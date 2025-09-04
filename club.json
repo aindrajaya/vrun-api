@@ -1,0 +1,1954 @@
+[
+  {
+    "resource_state": 2,
+    "athlete": {
+      "resource_state": 2,
+      "firstname": "Iwan Syalalalalalal",
+      "lastname": "S."
+    },
+    "name": "Morning Run",
+    "distance": 5366.7,
+    "moving_time": 1777,
+    "elapsed_time": 1777,
+    "total_elevation_gain": 2.9,
+    "type": "Run",
+    "sport_type": "Run",
+    "workout_type": null
+  },
+  {
+    "resource_state": 2,
+    "athlete": {
+      "resource_state": 2,
+      "firstname": "Basuki",
+      "lastname": "P."
+    },
+    "name": "Berlari Sore \n#part1",
+    "distance": 10033.2,
+    "moving_time": 5707,
+    "elapsed_time": 6622,
+    "total_elevation_gain": 8.1,
+    "type": "Run",
+    "sport_type": "Run",
+    "workout_type": null
+  },
+  {
+    "resource_state": 2,
+    "athlete": {
+      "resource_state": 2,
+      "firstname": "Pastor",
+      "lastname": "J."
+    },
+    "name": "Rodagem longuinha leve🦬 Búfalos Team 🦬",
+    "distance": 22014.1,
+    "moving_time": 7143,
+    "elapsed_time": 7375,
+    "total_elevation_gain": 219,
+    "type": "Run",
+    "sport_type": "Run",
+    "workout_type": null
+  },
+  {
+    "resource_state": 2,
+    "athlete": {
+      "resource_state": 2,
+      "firstname": "Esio",
+      "lastname": "P."
+    },
+    "name": "CORRENDO NAS TRILHAS URBANAS DE RECIFE=31/08/2025",
+    "distance": 11291.8,
+    "moving_time": 5297,
+    "elapsed_time": 7101,
+    "total_elevation_gain": 11,
+    "type": "Run",
+    "sport_type": "Run",
+    "workout_type": 0
+  },
+  {
+    "resource_state": 2,
+    "athlete": {
+      "resource_state": 2,
+      "firstname": "Wulan",
+      "lastname": "S."
+    },
+    "name": "Long run 1312",
+    "distance": 13128.5,
+    "moving_time": 5391,
+    "elapsed_time": 5430,
+    "total_elevation_gain": 0,
+    "type": "Run",
+    "sport_type": "Run",
+    "workout_type": null
+  },
+  {
+    "resource_state": 2,
+    "athlete": {
+      "resource_state": 2,
+      "firstname": "Dhian",
+      "lastname": "H."
+    },
+    "name": "Berlari Sore",
+    "distance": 5005.4,
+    "moving_time": 2048,
+    "elapsed_time": 2060,
+    "total_elevation_gain": 76,
+    "type": "Run",
+    "sport_type": "Run",
+    "workout_type": null
+  },
+  {
+    "resource_state": 2,
+    "athlete": {
+      "resource_state": 2,
+      "firstname": "Anita",
+      "lastname": "Q."
+    },
+    "name": "Setorun_virtual_Pelindo Run #1",
+    "distance": 12236.2,
+    "moving_time": 4047,
+    "elapsed_time": 4742,
+    "total_elevation_gain": 107.2,
+    "type": "Run",
+    "sport_type": "Run",
+    "workout_type": null
+  },
+  {
+    "resource_state": 2,
+    "athlete": {
+      "resource_state": 2,
+      "firstname": "Esio",
+      "lastname": "P."
+    },
+    "name": "CORRENDO NAS TRILHAS URBANAS DE RECIFE=30/08/2025",
+    "distance": 14747,
+    "moving_time": 6802,
+    "elapsed_time": 9764,
+    "total_elevation_gain": 25,
+    "type": "Run",
+    "sport_type": "Run",
+    "workout_type": 0
+  },
+  {
+    "resource_state": 2,
+    "athlete": {
+      "resource_state": 2,
+      "firstname": "Wulan",
+      "lastname": "S."
+    },
+    "name": "Easy Run",
+    "distance": 5750.4,
+    "moving_time": 2758,
+    "elapsed_time": 5291,
+    "total_elevation_gain": 13.9,
+    "type": "Run",
+    "sport_type": "Run",
+    "workout_type": null
+  },
+  {
+    "resource_state": 2,
+    "athlete": {
+      "resource_state": 2,
+      "firstname": "Esio",
+      "lastname": "P."
+    },
+    "name": "CORRENDO NAS TRILHAS URBANAS DE RECIFE=29/08/2025",
+    "distance": 10545.8,
+    "moving_time": 5170,
+    "elapsed_time": 7239,
+    "total_elevation_gain": 12,
+    "type": "Run",
+    "sport_type": "Run",
+    "workout_type": 0
+  },
+  {
+    "resource_state": 2,
+    "athlete": {
+      "resource_state": 2,
+      "firstname": "Iwan",
+      "lastname": "S."
+    },
+    "name": "Morning Run",
+    "distance": 5023.5,
+    "moving_time": 1640,
+    "elapsed_time": 1640,
+    "total_elevation_gain": 3.1,
+    "type": "Run",
+    "sport_type": "Run",
+    "workout_type": null
+  },
+  {
+    "resource_state": 2,
+    "athlete": {
+      "resource_state": 2,
+      "firstname": "Pastor",
+      "lastname": "J."
+    },
+    "name": "Rodagem 🦬 Búfalos Team 🦬",
+    "distance": 11078.7,
+    "moving_time": 3158,
+    "elapsed_time": 3240,
+    "total_elevation_gain": 70,
+    "type": "Run",
+    "sport_type": "Run",
+    "workout_type": null
+  },
+  {
+    "resource_state": 2,
+    "athlete": {
+      "resource_state": 2,
+      "firstname": "Marastuti",
+      "lastname": "A."
+    },
+    "name": "Evening Run",
+    "distance": 2008.7,
+    "moving_time": 1356,
+    "elapsed_time": 1356,
+    "total_elevation_gain": 23.8,
+    "type": "Run",
+    "sport_type": "Run",
+    "workout_type": null
+  },
+  {
+    "resource_state": 2,
+    "athlete": {
+      "resource_state": 2,
+      "firstname": "Dhian",
+      "lastname": "H."
+    },
+    "name": "Berlari Sore",
+    "distance": 3000.6,
+    "moving_time": 1252,
+    "elapsed_time": 1258,
+    "total_elevation_gain": 44.6,
+    "type": "Run",
+    "sport_type": "Run",
+    "workout_type": null
+  },
+  {
+    "resource_state": 2,
+    "athlete": {
+      "resource_state": 2,
+      "firstname": "Wulan",
+      "lastname": "S."
+    },
+    "name": "Recovery Run",
+    "distance": 9108.9,
+    "moving_time": 4712,
+    "elapsed_time": 4715,
+    "total_elevation_gain": 71.7,
+    "type": "Run",
+    "sport_type": "Run",
+    "workout_type": null
+  },
+  {
+    "resource_state": 2,
+    "athlete": {
+      "resource_state": 2,
+      "firstname": "Pastor",
+      "lastname": "J."
+    },
+    "name": "Rodagem moderada/Forte🦬 Búfalos Team 🦬",
+    "distance": 6365.2,
+    "moving_time": 1621,
+    "elapsed_time": 1867,
+    "total_elevation_gain": 36,
+    "type": "Run",
+    "sport_type": "Run",
+    "workout_type": null
+  },
+  {
+    "resource_state": 2,
+    "athlete": {
+      "resource_state": 2,
+      "firstname": "Esio",
+      "lastname": "P."
+    },
+    "name": "CORRENDO NAS TRILHAS URBANAS DE RECIFE=28/08/2025",
+    "distance": 13643.8,
+    "moving_time": 6634,
+    "elapsed_time": 9378,
+    "total_elevation_gain": 25,
+    "type": "Run",
+    "sport_type": "Run",
+    "workout_type": 0
+  },
+  {
+    "resource_state": 2,
+    "athlete": {
+      "resource_state": 2,
+      "firstname": "Esio",
+      "lastname": "P."
+    },
+    "name": "CORRENDO NAS TRILHAS URBANAS DE RECIFE=27/08/2025",
+    "distance": 12550.2,
+    "moving_time": 6005,
+    "elapsed_time": 8287,
+    "total_elevation_gain": 21,
+    "type": "Run",
+    "sport_type": "Run",
+    "workout_type": 0
+  },
+  {
+    "resource_state": 2,
+    "athlete": {
+      "resource_state": 2,
+      "firstname": "Tegar",
+      "lastname": "R."
+    },
+    "name": "Afternoon Run",
+    "distance": 4491.7,
+    "moving_time": 386,
+    "elapsed_time": 402,
+    "total_elevation_gain": 10.1,
+    "type": "Run",
+    "sport_type": "Run",
+    "workout_type": null
+  },
+  {
+    "resource_state": 2,
+    "athlete": {
+      "resource_state": 2,
+      "firstname": "Tegar",
+      "lastname": "R."
+    },
+    "name": "Afternoon Run",
+    "distance": 3901.3,
+    "moving_time": 384,
+    "elapsed_time": 387,
+    "total_elevation_gain": 9.7,
+    "type": "Run",
+    "sport_type": "Run",
+    "workout_type": null
+  },
+  {
+    "resource_state": 2,
+    "athlete": {
+      "resource_state": 2,
+      "firstname": "Iwan",
+      "lastname": "S."
+    },
+    "name": "Morning Run",
+    "distance": 5016.7,
+    "moving_time": 1645,
+    "elapsed_time": 1645,
+    "total_elevation_gain": 3.9,
+    "type": "Run",
+    "sport_type": "Run",
+    "workout_type": null
+  },
+  {
+    "resource_state": 2,
+    "athlete": {
+      "resource_state": 2,
+      "firstname": "Pastor",
+      "lastname": "J."
+    },
+    "name": "Rodagem longa leve🦬 Búfalos Team 🦬",
+    "distance": 28007.7,
+    "moving_time": 8369,
+    "elapsed_time": 9361,
+    "total_elevation_gain": 228,
+    "type": "Run",
+    "sport_type": "Run",
+    "workout_type": null
+  },
+  {
+    "resource_state": 2,
+    "athlete": {
+      "resource_state": 2,
+      "firstname": "Basuki",
+      "lastname": "P."
+    },
+    "name": "Berlari Sore",
+    "distance": 58.1,
+    "moving_time": 34,
+    "elapsed_time": 34,
+    "total_elevation_gain": 0,
+    "type": "Run",
+    "sport_type": "Run",
+    "workout_type": 0
+  },
+  {
+    "resource_state": 2,
+    "athlete": {
+      "resource_state": 2,
+      "firstname": "Basuki",
+      "lastname": "P."
+    },
+    "name": "Berlari Sore",
+    "distance": 3214.6,
+    "moving_time": 1468,
+    "elapsed_time": 1653,
+    "total_elevation_gain": 0,
+    "type": "Run",
+    "sport_type": "Run",
+    "workout_type": 0
+  },
+  {
+    "resource_state": 2,
+    "athlete": {
+      "resource_state": 2,
+      "firstname": "Basuki",
+      "lastname": "P."
+    },
+    "name": "Berlari Sore",
+    "distance": 26.8,
+    "moving_time": 12,
+    "elapsed_time": 15,
+    "total_elevation_gain": 0,
+    "type": "Run",
+    "sport_type": "Run",
+    "workout_type": 0
+  },
+  {
+    "resource_state": 2,
+    "athlete": {
+      "resource_state": 2,
+      "firstname": "Esio",
+      "lastname": "P."
+    },
+    "name": "CORRENDO NAS TRILHAS URBANAS DE RECIFE=26/08/2025",
+    "distance": 12448.9,
+    "moving_time": 6224,
+    "elapsed_time": 7607,
+    "total_elevation_gain": 14,
+    "type": "Run",
+    "sport_type": "Run",
+    "workout_type": 0
+  },
+  {
+    "resource_state": 2,
+    "athlete": {
+      "resource_state": 2,
+      "firstname": "Iwan",
+      "lastname": "S."
+    },
+    "name": "Morning Run",
+    "distance": 5355.4,
+    "moving_time": 1757,
+    "elapsed_time": 1757,
+    "total_elevation_gain": 3.2,
+    "type": "Run",
+    "sport_type": "Run",
+    "workout_type": null
+  },
+  {
+    "resource_state": 2,
+    "athlete": {
+      "resource_state": 2,
+      "firstname": "Esio",
+      "lastname": "P."
+    },
+    "name": "CORRENDO NAS TRILHAS URBANAS DE RECIFE=25/08/2025",
+    "distance": 16716.3,
+    "moving_time": 8461,
+    "elapsed_time": 12013,
+    "total_elevation_gain": 25,
+    "type": "Run",
+    "sport_type": "Run",
+    "workout_type": 0
+  },
+  {
+    "resource_state": 2,
+    "athlete": {
+      "resource_state": 2,
+      "firstname": "Pastor",
+      "lastname": "J."
+    },
+    "name": "Rodagem moderada 🦬 Búfalos Team 🦬 4 voltas Cipó City",
+    "distance": 22252.5,
+    "moving_time": 6394,
+    "elapsed_time": 6755,
+    "total_elevation_gain": 193,
+    "type": "Run",
+    "sport_type": "Run",
+    "workout_type": 0
+  },
+  {
+    "resource_state": 2,
+    "athlete": {
+      "resource_state": 2,
+      "firstname": "Dhian",
+      "lastname": "H."
+    },
+    "name": "Berlari Sore",
+    "distance": 3657.2,
+    "moving_time": 1492,
+    "elapsed_time": 1492,
+    "total_elevation_gain": 27.4,
+    "type": "Run",
+    "sport_type": "Run",
+    "workout_type": 0
+  },
+  {
+    "resource_state": 2,
+    "athlete": {
+      "resource_state": 2,
+      "firstname": "Esio",
+      "lastname": "P."
+    },
+    "name": "Corrida matinal",
+    "distance": 10331.6,
+    "moving_time": 5323,
+    "elapsed_time": 7129,
+    "total_elevation_gain": 10,
+    "type": "Run",
+    "sport_type": "Run",
+    "workout_type": null
+  },
+  {
+    "resource_state": 2,
+    "athlete": {
+      "resource_state": 2,
+      "firstname": "Marastuti",
+      "lastname": "A."
+    },
+    "name": "Morning Run",
+    "distance": 2053.8,
+    "moving_time": 1334,
+    "elapsed_time": 1342,
+    "total_elevation_gain": 0,
+    "type": "Run",
+    "sport_type": "Run",
+    "workout_type": null
+  },
+  {
+    "resource_state": 2,
+    "athlete": {
+      "resource_state": 2,
+      "firstname": "Tegar",
+      "lastname": "R."
+    },
+    "name": "Morning Run",
+    "distance": 10891.8,
+    "moving_time": 1664,
+    "elapsed_time": 1847,
+    "total_elevation_gain": 15.4,
+    "type": "Run",
+    "sport_type": "Run",
+    "workout_type": null
+  },
+  {
+    "resource_state": 2,
+    "athlete": {
+      "resource_state": 2,
+      "firstname": "Pastor",
+      "lastname": "J."
+    },
+    "name": "Rodagem moderada 🦬 Búfalos Team 🦬",
+    "distance": 5565.5,
+    "moving_time": 1403,
+    "elapsed_time": 1427,
+    "total_elevation_gain": 35,
+    "type": "Run",
+    "sport_type": "Run",
+    "workout_type": null
+  },
+  {
+    "resource_state": 2,
+    "athlete": {
+      "resource_state": 2,
+      "firstname": "Esio",
+      "lastname": "P."
+    },
+    "name": "CORRENDO NAS TRILHAS URBANAS DE RECIFE=23/08/2025",
+    "distance": 14185.3,
+    "moving_time": 7265,
+    "elapsed_time": 9363,
+    "total_elevation_gain": 33,
+    "type": "Run",
+    "sport_type": "Run",
+    "workout_type": 0
+  },
+  {
+    "resource_state": 2,
+    "athlete": {
+      "resource_state": 2,
+      "firstname": "Tegar",
+      "lastname": "R."
+    },
+    "name": "Morning Run",
+    "distance": 10014.4,
+    "moving_time": 4328,
+    "elapsed_time": 8297,
+    "total_elevation_gain": 110.6,
+    "type": "Run",
+    "sport_type": "Run",
+    "workout_type": null
+  },
+  {
+    "resource_state": 2,
+    "athlete": {
+      "resource_state": 2,
+      "firstname": "Wulan",
+      "lastname": "S."
+    },
+    "name": "Morning Run",
+    "distance": 9650.3,
+    "moving_time": 4481,
+    "elapsed_time": 6502,
+    "total_elevation_gain": 171,
+    "type": "Run",
+    "sport_type": "Run",
+    "workout_type": 0
+  },
+  {
+    "resource_state": 2,
+    "athlete": {
+      "resource_state": 2,
+      "firstname": "Iwan",
+      "lastname": "S."
+    },
+    "name": "Try a new cheap shoes Run",
+    "distance": 12252.3,
+    "moving_time": 4257,
+    "elapsed_time": 4322,
+    "total_elevation_gain": 2.7,
+    "type": "Run",
+    "sport_type": "Run",
+    "workout_type": 0
+  },
+  {
+    "resource_state": 2,
+    "athlete": {
+      "resource_state": 2,
+      "firstname": "Azam",
+      "lastname": "R."
+    },
+    "name": "Rolling Pangkalpinang",
+    "distance": 8053.6,
+    "moving_time": 3291,
+    "elapsed_time": 3612,
+    "total_elevation_gain": 55.9,
+    "type": "Run",
+    "sport_type": "Run",
+    "workout_type": 0
+  },
+  {
+    "resource_state": 2,
+    "athlete": {
+      "resource_state": 2,
+      "firstname": "Wulan",
+      "lastname": "S."
+    },
+    "name": "Recovery Run",
+    "distance": 12292.5,
+    "moving_time": 6223,
+    "elapsed_time": 6336,
+    "total_elevation_gain": 63.1,
+    "type": "Run",
+    "sport_type": "Run",
+    "workout_type": 0
+  },
+  {
+    "resource_state": 2,
+    "athlete": {
+      "resource_state": 2,
+      "firstname": "Pastor",
+      "lastname": "J."
+    },
+    "name": "Rodagem leve 🦬 Búfalos Team 🦬",
+    "distance": 13011.1,
+    "moving_time": 4036,
+    "elapsed_time": 4087,
+    "total_elevation_gain": 92,
+    "type": "Run",
+    "sport_type": "Run",
+    "workout_type": null
+  },
+  {
+    "resource_state": 2,
+    "athlete": {
+      "resource_state": 2,
+      "firstname": "Esio",
+      "lastname": "P."
+    },
+    "name": "Corrida matinal",
+    "distance": 4458.6,
+    "moving_time": 2366,
+    "elapsed_time": 2865,
+    "total_elevation_gain": 2,
+    "type": "Run",
+    "sport_type": "Run",
+    "workout_type": null
+  },
+  {
+    "resource_state": 2,
+    "athlete": {
+      "resource_state": 2,
+      "firstname": "Iwan",
+      "lastname": "S."
+    },
+    "name": "Morning Run",
+    "distance": 6084.4,
+    "moving_time": 2003,
+    "elapsed_time": 2003,
+    "total_elevation_gain": 0,
+    "type": "Run",
+    "sport_type": "Run",
+    "workout_type": null
+  },
+  {
+    "resource_state": 2,
+    "athlete": {
+      "resource_state": 2,
+      "firstname": "Pastor",
+      "lastname": "J."
+    },
+    "name": "Rodagem leve 🦬 Búfalos Team 🦬",
+    "distance": 12030.5,
+    "moving_time": 3737,
+    "elapsed_time": 4210,
+    "total_elevation_gain": 91,
+    "type": "Run",
+    "sport_type": "Run",
+    "workout_type": null
+  },
+  {
+    "resource_state": 2,
+    "athlete": {
+      "resource_state": 2,
+      "firstname": "Marastuti",
+      "lastname": "A."
+    },
+    "name": "Evening Run",
+    "distance": 1014,
+    "moving_time": 650,
+    "elapsed_time": 650,
+    "total_elevation_gain": 0,
+    "type": "Run",
+    "sport_type": "Run",
+    "workout_type": null
+  },
+  {
+    "resource_state": 2,
+    "athlete": {
+      "resource_state": 2,
+      "firstname": "Esio",
+      "lastname": "P."
+    },
+    "name": "CORRENDO NAS TRILHAS URBANAS DE RECIFE=20/08/2025",
+    "distance": 4511.8,
+    "moving_time": 2374,
+    "elapsed_time": 3626,
+    "total_elevation_gain": 5,
+    "type": "Run",
+    "sport_type": "Run",
+    "workout_type": 0
+  },
+  {
+    "resource_state": 2,
+    "athlete": {
+      "resource_state": 2,
+      "firstname": "Esio",
+      "lastname": "P."
+    },
+    "name": "CORRENDO NAS TRILHAS URBANAS DE RECIFE =19/08/2025",
+    "distance": 11390.5,
+    "moving_time": 5551,
+    "elapsed_time": 7551,
+    "total_elevation_gain": 20,
+    "type": "Run",
+    "sport_type": "Run",
+    "workout_type": 0
+  },
+  {
+    "resource_state": 2,
+    "athlete": {
+      "resource_state": 2,
+      "firstname": "Iwan",
+      "lastname": "S."
+    },
+    "name": "Morning Run",
+    "distance": 5306.9,
+    "moving_time": 1716,
+    "elapsed_time": 1716,
+    "total_elevation_gain": 0,
+    "type": "Run",
+    "sport_type": "Run",
+    "workout_type": 0
+  },
+  {
+    "resource_state": 2,
+    "athlete": {
+      "resource_state": 2,
+      "firstname": "Marastuti",
+      "lastname": "A."
+    },
+    "name": "Afternoon Run",
+    "distance": 2004.4,
+    "moving_time": 1322,
+    "elapsed_time": 1322,
+    "total_elevation_gain": 0,
+    "type": "Run",
+    "sport_type": "Run",
+    "workout_type": null
+  },
+  {
+    "resource_state": 2,
+    "athlete": {
+      "resource_state": 2,
+      "firstname": "Tegar",
+      "lastname": "R."
+    },
+    "name": "Afternoon Run",
+    "distance": 7981.4,
+    "moving_time": 1427,
+    "elapsed_time": 393848,
+    "total_elevation_gain": 72.7,
+    "type": "Run",
+    "sport_type": "Run",
+    "workout_type": null
+  },
+  {
+    "resource_state": 2,
+    "athlete": {
+      "resource_state": 2,
+      "firstname": "Esio",
+      "lastname": "P."
+    },
+    "name": "CORRENDO NAS TRILHAS URBANAS DE RECIFE=18/08/2025",
+    "distance": 12255.1,
+    "moving_time": 6090,
+    "elapsed_time": 9396,
+    "total_elevation_gain": 36,
+    "type": "Run",
+    "sport_type": "Run",
+    "workout_type": 0
+  },
+  {
+    "resource_state": 2,
+    "athlete": {
+      "resource_state": 2,
+      "firstname": "Azam",
+      "lastname": "R."
+    },
+    "name": "17",
+    "distance": 17805.9,
+    "moving_time": 7499,
+    "elapsed_time": 10052,
+    "total_elevation_gain": 12.7,
+    "type": "Run",
+    "sport_type": "Run",
+    "workout_type": 0
+  },
+  {
+    "resource_state": 2,
+    "athlete": {
+      "resource_state": 2,
+      "firstname": "Dhian",
+      "lastname": "H."
+    },
+    "name": "Berlari Sore",
+    "distance": 5010.7,
+    "moving_time": 2029,
+    "elapsed_time": 2041,
+    "total_elevation_gain": 40,
+    "type": "Run",
+    "sport_type": "Run",
+    "workout_type": 0
+  },
+  {
+    "resource_state": 2,
+    "athlete": {
+      "resource_state": 2,
+      "firstname": "Pastor",
+      "lastname": "J."
+    },
+    "name": "Rodagem leve 🦬 Búfalos Team 🦬",
+    "distance": 17102,
+    "moving_time": 5062,
+    "elapsed_time": 5927,
+    "total_elevation_gain": 106,
+    "type": "Run",
+    "sport_type": "Run",
+    "workout_type": null
+  },
+  {
+    "resource_state": 2,
+    "athlete": {
+      "resource_state": 2,
+      "firstname": "Azam",
+      "lastname": "R."
+    },
+    "name": "Nyore",
+    "distance": 8583.5,
+    "moving_time": 3059,
+    "elapsed_time": 3158,
+    "total_elevation_gain": 35.2,
+    "type": "Run",
+    "sport_type": "Run",
+    "workout_type": 0
+  },
+  {
+    "resource_state": 2,
+    "athlete": {
+      "resource_state": 2,
+      "firstname": "Anita",
+      "lastname": "Q."
+    },
+    "name": "Yakin satu jam bisa 16km ??? Ada masalah dg GPS deh",
+    "distance": 16683.7,
+    "moving_time": 2814,
+    "elapsed_time": 3611,
+    "total_elevation_gain": 87.5,
+    "type": "Run",
+    "sport_type": "Run",
+    "workout_type": 0
+  },
+  {
+    "resource_state": 2,
+    "athlete": {
+      "resource_state": 2,
+      "firstname": "Esio",
+      "lastname": "P."
+    },
+    "name": "CORRENDO NAS TRILHAS URBANAS DE RECIFE =17/08/2025",
+    "distance": 10742.7,
+    "moving_time": 5400,
+    "elapsed_time": 8710,
+    "total_elevation_gain": 19,
+    "type": "Run",
+    "sport_type": "Run",
+    "workout_type": 0
+  },
+  {
+    "resource_state": 2,
+    "athlete": {
+      "resource_state": 2,
+      "firstname": "Wulan",
+      "lastname": "S."
+    },
+    "name": "Recovery Run",
+    "distance": 11171.9,
+    "moving_time": 5748,
+    "elapsed_time": 5846,
+    "total_elevation_gain": 3.2,
+    "type": "Run",
+    "sport_type": "Run",
+    "workout_type": 0
+  },
+  {
+    "resource_state": 2,
+    "athlete": {
+      "resource_state": 2,
+      "firstname": "Pastor",
+      "lastname": "J."
+    },
+    "name": "Rodagem com intervalado em rampa 12X200🦬 Búfalos Team 🦬",
+    "distance": 11018.8,
+    "moving_time": 3400,
+    "elapsed_time": 3400,
+    "total_elevation_gain": 88,
+    "type": "Run",
+    "sport_type": "Run",
+    "workout_type": null
+  },
+  {
+    "resource_state": 2,
+    "athlete": {
+      "resource_state": 2,
+      "firstname": "Esio",
+      "lastname": "P."
+    },
+    "name": "CORRENDO NAS TRILHAS URBANAS DE RECIFE=16/08/2025",
+    "distance": 19025.2,
+    "moving_time": 9050,
+    "elapsed_time": 12743,
+    "total_elevation_gain": 42,
+    "type": "Run",
+    "sport_type": "Run",
+    "workout_type": 0
+  },
+  {
+    "resource_state": 2,
+    "athlete": {
+      "resource_state": 2,
+      "firstname": "Azam",
+      "lastname": "R."
+    },
+    "name": "Revv",
+    "distance": 8191.2,
+    "moving_time": 3397,
+    "elapsed_time": 4869,
+    "total_elevation_gain": 14.6,
+    "type": "Run",
+    "sport_type": "Run",
+    "workout_type": 0
+  },
+  {
+    "resource_state": 2,
+    "athlete": {
+      "resource_state": 2,
+      "firstname": "Wulan",
+      "lastname": "S."
+    },
+    "name": "Long Run",
+    "distance": 17645.8,
+    "moving_time": 7633,
+    "elapsed_time": 8545,
+    "total_elevation_gain": 45.1,
+    "type": "Run",
+    "sport_type": "Run",
+    "workout_type": 0
+  },
+  {
+    "resource_state": 2,
+    "athlete": {
+      "resource_state": 2,
+      "firstname": "Iwan",
+      "lastname": "S."
+    },
+    "name": "Morning Run",
+    "distance": 12024.6,
+    "moving_time": 4101,
+    "elapsed_time": 4101,
+    "total_elevation_gain": 0,
+    "type": "Run",
+    "sport_type": "Run",
+    "workout_type": null
+  },
+  {
+    "resource_state": 2,
+    "athlete": {
+      "resource_state": 2,
+      "firstname": "Pastor",
+      "lastname": "J."
+    },
+    "name": "Rodagem 🦬 Búfalos Team 🦬",
+    "distance": 6010.8,
+    "moving_time": 1694,
+    "elapsed_time": 1700,
+    "total_elevation_gain": 45,
+    "type": "Run",
+    "sport_type": "Run",
+    "workout_type": null
+  },
+  {
+    "resource_state": 2,
+    "athlete": {
+      "resource_state": 2,
+      "firstname": "Esio",
+      "lastname": "P."
+    },
+    "name": "CORRENDO NAS TRILHAS URBANAS DE RECIFE=15/08/2025",
+    "distance": 15324.4,
+    "moving_time": 7679,
+    "elapsed_time": 10168,
+    "total_elevation_gain": 51,
+    "type": "Run",
+    "sport_type": "Run",
+    "workout_type": 0
+  },
+  {
+    "resource_state": 2,
+    "athlete": {
+      "resource_state": 2,
+      "firstname": "Wulan",
+      "lastname": "S."
+    },
+    "name": "Easy Run",
+    "distance": 13095.3,
+    "moving_time": 6246,
+    "elapsed_time": 6360,
+    "total_elevation_gain": 9.4,
+    "type": "Run",
+    "sport_type": "Run",
+    "workout_type": 0
+  },
+  {
+    "resource_state": 2,
+    "athlete": {
+      "resource_state": 2,
+      "firstname": "Pastor",
+      "lastname": "J."
+    },
+    "name": "Rodagem curta intervalada 🦬 Búfalos Team 🦬",
+    "distance": 7012.8,
+    "moving_time": 1792,
+    "elapsed_time": 2219,
+    "total_elevation_gain": 50,
+    "type": "Run",
+    "sport_type": "Run",
+    "workout_type": null
+  },
+  {
+    "resource_state": 2,
+    "athlete": {
+      "resource_state": 2,
+      "firstname": "Esio",
+      "lastname": "P."
+    },
+    "name": "CORRENDO NAS TRILHAS URBANAS DE RECIFE =14/08/2025",
+    "distance": 11026.7,
+    "moving_time": 5360,
+    "elapsed_time": 9352,
+    "total_elevation_gain": 10,
+    "type": "Run",
+    "sport_type": "Run",
+    "workout_type": 0
+  },
+  {
+    "resource_state": 2,
+    "athlete": {
+      "resource_state": 2,
+      "firstname": "Iwan",
+      "lastname": "S."
+    },
+    "name": "Morning Run",
+    "distance": 6231.9,
+    "moving_time": 2082,
+    "elapsed_time": 2082,
+    "total_elevation_gain": 2.8,
+    "type": "Run",
+    "sport_type": "Run",
+    "workout_type": null
+  },
+  {
+    "resource_state": 2,
+    "athlete": {
+      "resource_state": 2,
+      "firstname": "Basuki",
+      "lastname": "P."
+    },
+    "name": "Evening Fun Run Insomnia",
+    "distance": 7484.2,
+    "moving_time": 4004,
+    "elapsed_time": 4058,
+    "total_elevation_gain": 58.6,
+    "type": "Run",
+    "sport_type": "Run",
+    "workout_type": 0
+  },
+  {
+    "resource_state": 2,
+    "athlete": {
+      "resource_state": 2,
+      "firstname": "Esio",
+      "lastname": "P."
+    },
+    "name": "CORRENDO NAS TRILHAS URBANAS DE RECIFE=13/08/2025",
+    "distance": 10071.5,
+    "moving_time": 5005,
+    "elapsed_time": 6819,
+    "total_elevation_gain": 12,
+    "type": "Run",
+    "sport_type": "Run",
+    "workout_type": 0
+  },
+  {
+    "resource_state": 2,
+    "athlete": {
+      "resource_state": 2,
+      "firstname": "Azam",
+      "lastname": "R."
+    },
+    "name": "Refine",
+    "distance": 8270.4,
+    "moving_time": 3016,
+    "elapsed_time": 3105,
+    "total_elevation_gain": 7.9,
+    "type": "Run",
+    "sport_type": "Run",
+    "workout_type": 0
+  },
+  {
+    "resource_state": 2,
+    "athlete": {
+      "resource_state": 2,
+      "firstname": "Pastor",
+      "lastname": "J."
+    },
+    "name": "Rodagem leve 🦬 Búfalos Team 🦬",
+    "distance": 11014.9,
+    "moving_time": 3424,
+    "elapsed_time": 3530,
+    "total_elevation_gain": 156,
+    "type": "Run",
+    "sport_type": "Run",
+    "workout_type": null
+  },
+  {
+    "resource_state": 2,
+    "athlete": {
+      "resource_state": 2,
+      "firstname": "Marastuti",
+      "lastname": "A."
+    },
+    "name": "Evening Run",
+    "distance": 2000.9,
+    "moving_time": 1298,
+    "elapsed_time": 1300,
+    "total_elevation_gain": 0,
+    "type": "Run",
+    "sport_type": "Run",
+    "workout_type": null
+  },
+  {
+    "resource_state": 2,
+    "athlete": {
+      "resource_state": 2,
+      "firstname": "Iwan",
+      "lastname": "S."
+    },
+    "name": "Morning Run",
+    "distance": 5332.1,
+    "moving_time": 1787,
+    "elapsed_time": 1787,
+    "total_elevation_gain": 2.8,
+    "type": "Run",
+    "sport_type": "Run",
+    "workout_type": null
+  },
+  {
+    "resource_state": 2,
+    "athlete": {
+      "resource_state": 2,
+      "firstname": "Dhian",
+      "lastname": "H."
+    },
+    "name": "Berlari Sore",
+    "distance": 5192.7,
+    "moving_time": 2240,
+    "elapsed_time": 2244,
+    "total_elevation_gain": 43.7,
+    "type": "Run",
+    "sport_type": "Run",
+    "workout_type": 0
+  },
+  {
+    "resource_state": 2,
+    "athlete": {
+      "resource_state": 2,
+      "firstname": "Pastor",
+      "lastname": "J."
+    },
+    "name": "Rodagem leve 🦬 Búfalos Team 🦬",
+    "distance": 19012,
+    "moving_time": 5613,
+    "elapsed_time": 5738,
+    "total_elevation_gain": 116,
+    "type": "Run",
+    "sport_type": "Run",
+    "workout_type": null
+  },
+  {
+    "resource_state": 2,
+    "athlete": {
+      "resource_state": 2,
+      "firstname": "Esio",
+      "lastname": "P."
+    },
+    "name": "CORRENDO NAS TRILHAS URBANAS DE RECIFE=10/08/2025",
+    "distance": 14043.7,
+    "moving_time": 6751,
+    "elapsed_time": 10364,
+    "total_elevation_gain": 21,
+    "type": "Run",
+    "sport_type": "Run",
+    "workout_type": 0
+  },
+  {
+    "resource_state": 2,
+    "athlete": {
+      "resource_state": 2,
+      "firstname": "Anita",
+      "lastname": "Q."
+    },
+    "name": "Minggu ku 🩷🩵🩶🥲❤️‍🔥",
+    "distance": 5315,
+    "moving_time": 2761,
+    "elapsed_time": 2801,
+    "total_elevation_gain": 21.2,
+    "type": "Run",
+    "sport_type": "Run",
+    "workout_type": null
+  },
+  {
+    "resource_state": 2,
+    "athlete": {
+      "resource_state": 2,
+      "firstname": "Wulan",
+      "lastname": "S."
+    },
+    "name": "Long Run max hr z4",
+    "distance": 15229.1,
+    "moving_time": 6670,
+    "elapsed_time": 6820,
+    "total_elevation_gain": 15.1,
+    "type": "Run",
+    "sport_type": "Run",
+    "workout_type": 0
+  },
+  {
+    "resource_state": 2,
+    "athlete": {
+      "resource_state": 2,
+      "firstname": "Esio",
+      "lastname": "P."
+    },
+    "name": "CORRENDO NAS TRILHAS URBANAS DE RECIFE=09/08/2025",
+    "distance": 16054.2,
+    "moving_time": 8207,
+    "elapsed_time": 11823,
+    "total_elevation_gain": 26,
+    "type": "Run",
+    "sport_type": "Run",
+    "workout_type": 0
+  },
+  {
+    "resource_state": 2,
+    "athlete": {
+      "resource_state": 2,
+      "firstname": "Anita",
+      "lastname": "Q."
+    },
+    "name": "Lari Sabtu 🥲😖",
+    "distance": 5238,
+    "moving_time": 2641,
+    "elapsed_time": 3131,
+    "total_elevation_gain": 25.8,
+    "type": "Run",
+    "sport_type": "Run",
+    "workout_type": null
+  },
+  {
+    "resource_state": 2,
+    "athlete": {
+      "resource_state": 2,
+      "firstname": "Azam",
+      "lastname": "R."
+    },
+    "name": "Bromo",
+    "distance": 26185.3,
+    "moving_time": 15734,
+    "elapsed_time": 21388,
+    "total_elevation_gain": 611.9,
+    "type": "Run",
+    "sport_type": "Run",
+    "workout_type": 0
+  },
+  {
+    "resource_state": 2,
+    "athlete": {
+      "resource_state": 2,
+      "firstname": "Wulan",
+      "lastname": "S."
+    },
+    "name": "Recovery Run max HR Zona 2 (132)",
+    "distance": 10158.4,
+    "moving_time": 6403,
+    "elapsed_time": 6419,
+    "total_elevation_gain": 19.7,
+    "type": "Run",
+    "sport_type": "Run",
+    "workout_type": 0
+  },
+  {
+    "resource_state": 2,
+    "athlete": {
+      "resource_state": 2,
+      "firstname": "Iwan",
+      "lastname": "S."
+    },
+    "name": "Morning Run",
+    "distance": 7027.9,
+    "moving_time": 2307,
+    "elapsed_time": 2315,
+    "total_elevation_gain": 0,
+    "type": "Run",
+    "sport_type": "Run",
+    "workout_type": null
+  },
+  {
+    "resource_state": 2,
+    "athlete": {
+      "resource_state": 2,
+      "firstname": "Esio",
+      "lastname": "P."
+    },
+    "name": "CORRENDO NAS TRILHAS URBANAS DE RECIFE=08/08/2025",
+    "distance": 9356.6,
+    "moving_time": 4886,
+    "elapsed_time": 7158,
+    "total_elevation_gain": 3,
+    "type": "Run",
+    "sport_type": "Run",
+    "workout_type": 0
+  },
+  {
+    "resource_state": 2,
+    "athlete": {
+      "resource_state": 2,
+      "firstname": "Esio",
+      "lastname": "P."
+    },
+    "name": "CORRENDO NAS TRILHAS URBANAS DE RECIFE=07/08/2025",
+    "distance": 6131.5,
+    "moving_time": 3143,
+    "elapsed_time": 4329,
+    "total_elevation_gain": 4,
+    "type": "Run",
+    "sport_type": "Run",
+    "workout_type": 0
+  },
+  {
+    "resource_state": 2,
+    "athlete": {
+      "resource_state": 2,
+      "firstname": "Iwan",
+      "lastname": "S."
+    },
+    "name": "Morning Run",
+    "distance": 5377.5,
+    "moving_time": 1754,
+    "elapsed_time": 1803,
+    "total_elevation_gain": 2,
+    "type": "Run",
+    "sport_type": "Run",
+    "workout_type": null
+  },
+  {
+    "resource_state": 2,
+    "athlete": {
+      "resource_state": 2,
+      "firstname": "Pastor",
+      "lastname": "J."
+    },
+    "name": "Rodagem com intervalados 🦬 Búfalos Team 🦬",
+    "distance": 17014.3,
+    "moving_time": 4921,
+    "elapsed_time": 5140,
+    "total_elevation_gain": 100,
+    "type": "Run",
+    "sport_type": "Run",
+    "workout_type": null
+  },
+  {
+    "resource_state": 2,
+    "athlete": {
+      "resource_state": 2,
+      "firstname": "Azam",
+      "lastname": "R."
+    },
+    "name": "Loose",
+    "distance": 6211.9,
+    "moving_time": 2557,
+    "elapsed_time": 3606,
+    "total_elevation_gain": 5.7,
+    "type": "Run",
+    "sport_type": "Run",
+    "workout_type": 0
+  },
+  {
+    "resource_state": 2,
+    "athlete": {
+      "resource_state": 2,
+      "firstname": "Esio",
+      "lastname": "P."
+    },
+    "name": "CORRENDO NAS TRILHAS URBANAS DE RECIFE=06/08/2025",
+    "distance": 11424.2,
+    "moving_time": 5547,
+    "elapsed_time": 7779,
+    "total_elevation_gain": 27,
+    "type": "Run",
+    "sport_type": "Run",
+    "workout_type": 0
+  },
+  {
+    "resource_state": 2,
+    "athlete": {
+      "resource_state": 2,
+      "firstname": "Azam",
+      "lastname": "R."
+    },
+    "name": "Regulate",
+    "distance": 5628.6,
+    "moving_time": 2108,
+    "elapsed_time": 2175,
+    "total_elevation_gain": 4.3,
+    "type": "Run",
+    "sport_type": "Run",
+    "workout_type": 0
+  },
+  {
+    "resource_state": 2,
+    "athlete": {
+      "resource_state": 2,
+      "firstname": "Dhian",
+      "lastname": "H."
+    },
+    "name": "Berlari Sore",
+    "distance": 3006.8,
+    "moving_time": 1363,
+    "elapsed_time": 1368,
+    "total_elevation_gain": 43.4,
+    "type": "Run",
+    "sport_type": "Run",
+    "workout_type": 0
+  },
+  {
+    "resource_state": 2,
+    "athlete": {
+      "resource_state": 2,
+      "firstname": "Esio",
+      "lastname": "P."
+    },
+    "name": "CORRENDO NAS TRILHAS URBANAS DE RECIFE=05/08/2025",
+    "distance": 10182,
+    "moving_time": 5128,
+    "elapsed_time": 6675,
+    "total_elevation_gain": 7,
+    "type": "Run",
+    "sport_type": "Run",
+    "workout_type": 0
+  },
+  {
+    "resource_state": 2,
+    "athlete": {
+      "resource_state": 2,
+      "firstname": "Tegar",
+      "lastname": "R."
+    },
+    "name": "Morning Run",
+    "distance": 4358.1,
+    "moving_time": 2489,
+    "elapsed_time": 2527,
+    "total_elevation_gain": 5,
+    "type": "Run",
+    "sport_type": "Run",
+    "workout_type": null
+  },
+  {
+    "resource_state": 2,
+    "athlete": {
+      "resource_state": 2,
+      "firstname": "Tegar",
+      "lastname": "R."
+    },
+    "name": "Morning Run",
+    "distance": 4.6,
+    "moving_time": 0,
+    "elapsed_time": 23,
+    "total_elevation_gain": 0,
+    "type": "Run",
+    "sport_type": "Run",
+    "workout_type": null
+  },
+  {
+    "resource_state": 2,
+    "athlete": {
+      "resource_state": 2,
+      "firstname": "Iwan",
+      "lastname": "S."
+    },
+    "name": "Morning Run",
+    "distance": 5385.7,
+    "moving_time": 1775,
+    "elapsed_time": 1827,
+    "total_elevation_gain": 0,
+    "type": "Run",
+    "sport_type": "Run",
+    "workout_type": null
+  },
+  {
+    "resource_state": 2,
+    "athlete": {
+      "resource_state": 2,
+      "firstname": "Pastor",
+      "lastname": "J."
+    },
+    "name": "Rodagem longa leve 🦬 Búfalos Team 🦬",
+    "distance": 25019.6,
+    "moving_time": 7587,
+    "elapsed_time": 7835,
+    "total_elevation_gain": 144,
+    "type": "Run",
+    "sport_type": "Run",
+    "workout_type": 0
+  },
+  {
+    "resource_state": 2,
+    "athlete": {
+      "resource_state": 2,
+      "firstname": "Esio",
+      "lastname": "P."
+    },
+    "name": "CORRENDO NAS TRILHAS URBANAS DE RECIFE =04/08/2025",
+    "distance": 9129.9,
+    "moving_time": 4617,
+    "elapsed_time": 5867,
+    "total_elevation_gain": 4,
+    "type": "Run",
+    "sport_type": "Run",
+    "workout_type": 0
+  },
+  {
+    "resource_state": 2,
+    "athlete": {
+      "resource_state": 2,
+      "firstname": "Tegar",
+      "lastname": "R."
+    },
+    "name": "Morning Run",
+    "distance": 3356.1,
+    "moving_time": 1972,
+    "elapsed_time": 1995,
+    "total_elevation_gain": 2,
+    "type": "Run",
+    "sport_type": "Run",
+    "workout_type": null
+  },
+  {
+    "resource_state": 2,
+    "athlete": {
+      "resource_state": 2,
+      "firstname": "Dhian",
+      "lastname": "H."
+    },
+    "name": "Berlari Sore",
+    "distance": 4108.7,
+    "moving_time": 1782,
+    "elapsed_time": 1801,
+    "total_elevation_gain": 56.3,
+    "type": "Run",
+    "sport_type": "Run",
+    "workout_type": 0
+  },
+  {
+    "resource_state": 2,
+    "athlete": {
+      "resource_state": 2,
+      "firstname": "Esio",
+      "lastname": "P."
+    },
+    "name": "CORRENDO NAS TRILHAS URBANAS DE RECIFE=03/08/2025",
+    "distance": 17243.4,
+    "moving_time": 8915,
+    "elapsed_time": 14230,
+    "total_elevation_gain": 33,
+    "type": "Run",
+    "sport_type": "Run",
+    "workout_type": 0
+  },
+  {
+    "resource_state": 2,
+    "athlete": {
+      "resource_state": 2,
+      "firstname": "Azam",
+      "lastname": "R."
+    },
+    "name": "Hoorah",
+    "distance": 14218.5,
+    "moving_time": 4919,
+    "elapsed_time": 5830,
+    "total_elevation_gain": 2.2,
+    "type": "Run",
+    "sport_type": "Run",
+    "workout_type": 0
+  },
+  {
+    "resource_state": 2,
+    "athlete": {
+      "resource_state": 2,
+      "firstname": "Wulan",
+      "lastname": "S."
+    },
+    "name": "Long Run",
+    "distance": 15187.1,
+    "moving_time": 6465,
+    "elapsed_time": 6562,
+    "total_elevation_gain": 63.7,
+    "type": "Run",
+    "sport_type": "Run",
+    "workout_type": 0
+  },
+  {
+    "resource_state": 2,
+    "athlete": {
+      "resource_state": 2,
+      "firstname": "Esio",
+      "lastname": "P."
+    },
+    "name": "CORRENDO NAS TRILHAS URBANAS DE RECIFE=02/08/2025",
+    "distance": 11126.6,
+    "moving_time": 5799,
+    "elapsed_time": 7436,
+    "total_elevation_gain": 11,
+    "type": "Run",
+    "sport_type": "Run",
+    "workout_type": 0
+  },
+  {
+    "resource_state": 2,
+    "athlete": {
+      "resource_state": 2,
+      "firstname": "Wulan",
+      "lastname": "S."
+    },
+    "name": "ER with elevation",
+    "distance": 9123.9,
+    "moving_time": 4210,
+    "elapsed_time": 4229,
+    "total_elevation_gain": 132.3,
+    "type": "Run",
+    "sport_type": "Run",
+    "workout_type": 0
+  },
+  {
+    "resource_state": 2,
+    "athlete": {
+      "resource_state": 2,
+      "firstname": "Azam",
+      "lastname": "R."
+    },
+    "name": "Light",
+    "distance": 7371.1,
+    "moving_time": 2875,
+    "elapsed_time": 3544,
+    "total_elevation_gain": 2.7,
+    "type": "Run",
+    "sport_type": "Run",
+    "workout_type": 0
+  },
+  {
+    "resource_state": 2,
+    "athlete": {
+      "resource_state": 2,
+      "firstname": "Pastor",
+      "lastname": "J."
+    },
+    "name": "Rodagem leve 🦬 Búfalos Team 🦬",
+    "distance": 11014.8,
+    "moving_time": 3769,
+    "elapsed_time": 4152,
+    "total_elevation_gain": 86,
+    "type": "Run",
+    "sport_type": "Run",
+    "workout_type": null
+  },
+  {
+    "resource_state": 2,
+    "athlete": {
+      "resource_state": 2,
+      "firstname": "Esio",
+      "lastname": "P."
+    },
+    "name": "CORRENDO NAS TRILHAS URBANAS DE RECIFE=01/08/2025",
+    "distance": 14337.3,
+    "moving_time": 7524,
+    "elapsed_time": 11115,
+    "total_elevation_gain": 15,
+    "type": "Run",
+    "sport_type": "Run",
+    "workout_type": 0
+  },
+  {
+    "resource_state": 2,
+    "athlete": {
+      "resource_state": 2,
+      "firstname": "Azam",
+      "lastname": "R."
+    },
+    "name": "Legs rolling",
+    "distance": 10398.5,
+    "moving_time": 3614,
+    "elapsed_time": 3628,
+    "total_elevation_gain": 10.6,
+    "type": "Run",
+    "sport_type": "Run",
+    "workout_type": 0
+  },
+  {
+    "resource_state": 2,
+    "athlete": {
+      "resource_state": 2,
+      "firstname": "Pastor",
+      "lastname": "J."
+    },
+    "name": "Rodagem progressiva 🦬 Búfalos Team 🦬",
+    "distance": 15012.5,
+    "moving_time": 4439,
+    "elapsed_time": 4693,
+    "total_elevation_gain": 96,
+    "type": "Run",
+    "sport_type": "Run",
+    "workout_type": null
+  },
+  {
+    "resource_state": 2,
+    "athlete": {
+      "resource_state": 2,
+      "firstname": "Tegar",
+      "lastname": "R."
+    },
+    "name": "Afternoon Run",
+    "distance": 3003.6,
+    "moving_time": 1085,
+    "elapsed_time": 1255,
+    "total_elevation_gain": 0,
+    "type": "Run",
+    "sport_type": "Run",
+    "workout_type": null
+  },
+  {
+    "resource_state": 2,
+    "athlete": {
+      "resource_state": 2,
+      "firstname": "Wulan",
+      "lastname": "S."
+    },
+    "name": "RR Zona 2",
+    "distance": 9173.3,
+    "moving_time": 4986,
+    "elapsed_time": 5040,
+    "total_elevation_gain": 17.1,
+    "type": "Run",
+    "sport_type": "Run",
+    "workout_type": 0
+  },
+  {
+    "resource_state": 2,
+    "athlete": {
+      "resource_state": 2,
+      "firstname": "Tegar",
+      "lastname": "R."
+    },
+    "name": "Afternoon Run",
+    "distance": 5024.5,
+    "moving_time": 1770,
+    "elapsed_time": 1892,
+    "total_elevation_gain": 2.2,
+    "type": "Run",
+    "sport_type": "Run",
+    "workout_type": null
+  },
+  {
+    "resource_state": 2,
+    "athlete": {
+      "resource_state": 2,
+      "firstname": "Esio",
+      "lastname": "P."
+    },
+    "name": "CORRENDO NAS TRILHAS URBANAS DE RECIFE=31/07/2025",
+    "distance": 15568.9,
+    "moving_time": 7740,
+    "elapsed_time": 13494,
+    "total_elevation_gain": 20,
+    "type": "Run",
+    "sport_type": "Run",
+    "workout_type": 0
+  },
+  {
+    "resource_state": 2,
+    "athlete": {
+      "resource_state": 2,
+      "firstname": "Iwan",
+      "lastname": "S."
+    },
+    "name": "Morning Run",
+    "distance": 5419.3,
+    "moving_time": 1852,
+    "elapsed_time": 1885,
+    "total_elevation_gain": 2,
+    "type": "Run",
+    "sport_type": "Run",
+    "workout_type": null
+  },
+  {
+    "resource_state": 2,
+    "athlete": {
+      "resource_state": 2,
+      "firstname": "Azam",
+      "lastname": "R."
+    },
+    "name": "Brick 2",
+    "distance": 6156.8,
+    "moving_time": 2577,
+    "elapsed_time": 3636,
+    "total_elevation_gain": 8.5,
+    "type": "Run",
+    "sport_type": "Run",
+    "workout_type": 0
+  },
+  {
+    "resource_state": 2,
+    "athlete": {
+      "resource_state": 2,
+      "firstname": "Esio",
+      "lastname": "P."
+    },
+    "name": "CORRENDO NAS TRILHAS URBANAS DE RECIFE=30/07/2025",
+    "distance": 11554.1,
+    "moving_time": 5825,
+    "elapsed_time": 8428,
+    "total_elevation_gain": 14,
+    "type": "Run",
+    "sport_type": "Run",
+    "workout_type": 0
+  },
+  {
+    "resource_state": 2,
+    "athlete": {
+      "resource_state": 2,
+      "firstname": "Azam",
+      "lastname": "R."
+    },
+    "name": "Brick 1",
+    "distance": 8416.6,
+    "moving_time": 2982,
+    "elapsed_time": 3199,
+    "total_elevation_gain": 10.6,
+    "type": "Run",
+    "sport_type": "Run",
+    "workout_type": 0
+  },
+  {
+    "resource_state": 2,
+    "athlete": {
+      "resource_state": 2,
+      "firstname": "Pastor",
+      "lastname": "J."
+    },
+    "name": "Rodagem leve no estradão de chão 🦬 Búfalos Team 🦬",
+    "distance": 14013.8,
+    "moving_time": 4215,
+    "elapsed_time": 4417,
+    "total_elevation_gain": 241,
+    "type": "Run",
+    "sport_type": "Run",
+    "workout_type": null
+  },
+  {
+    "resource_state": 2,
+    "athlete": {
+      "resource_state": 2,
+      "firstname": "Dhian",
+      "lastname": "H."
+    },
+    "name": "Berlari Sore",
+    "distance": 5255.3,
+    "moving_time": 2394,
+    "elapsed_time": 2394,
+    "total_elevation_gain": 41.1,
+    "type": "Run",
+    "sport_type": "Run",
+    "workout_type": 0
+  },
+  {
+    "resource_state": 2,
+    "athlete": {
+      "resource_state": 2,
+      "firstname": "Esio",
+      "lastname": "P."
+    },
+    "name": "CORRENDO NAS TRILHAS URBANAS DE RECIFE=29/07/2025",
+    "distance": 10790.3,
+    "moving_time": 5580,
+    "elapsed_time": 7418,
+    "total_elevation_gain": 14,
+    "type": "Run",
+    "sport_type": "Run",
+    "workout_type": 0
+  }
+]

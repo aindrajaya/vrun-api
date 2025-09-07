@@ -2,6 +2,7 @@
 
 import { useState } from 'react';
 import Image from 'next/image';
+import Link from 'next/link';
 
 export default function SubmitPage() {
   const [formData, setFormData] = useState({
@@ -86,12 +87,14 @@ export default function SubmitPage() {
           <div className="flex justify-between items-center h-16">
             <div className="flex items-center">
               <div className="flex-shrink-0">
-                <Image src="/images/Logo1.svg" alt="Logo" width={100} height={32} className="sm:w-[120px] sm:h-[40px]" />
+                <Link href="https://werunpalestina.framer.website" className="inline-block">
+                  <Image src="/images/Logo1.svg" alt="Logo" width={100} height={32} className="sm:w-[120px] sm:h-[40px] hover:opacity-80 transition-opacity duration-200" />
+                </Link>
               </div>
             </div>
             
             {/* Desktop Navigation */}
-            <div className="hidden lg:block">
+            {/* <div className="hidden lg:block">
               <div className="ml-10 flex items-baseline space-x-6 xl:space-x-8">
                 <a href="https://werunpalestina.framer.website" className="text-gray-900 hover:text-gray-700 px-3 py-2 text-sm font-medium transition-colors">Beranda</a>
                 <a href="#" className="text-gray-900 hover:text-gray-700 px-3 py-2 text-sm font-medium transition-colors">Tentang</a>
@@ -102,23 +105,23 @@ export default function SubmitPage() {
                   Hubungi Kami
                 </button>
               </div>
-            </div>
+            </div> */}
 
             {/* Mobile menu button */}
-            <div className="lg:hidden">
+            {/* <div className="lg:hidden">
               <button className="inline-flex items-center justify-center p-2 rounded-md text-gray-400 hover:text-gray-500 hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-inset focus:ring-green-500">
                 <svg className="h-6 w-6" stroke="currentColor" fill="none" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 6h16M4 12h16M4 18h16" />
                 </svg>
               </button>
-            </div>
+            </div> */}
           </div>
         </nav>
       </header>
 
       {/* Main Content */}
       <main className="pt-20 pb-12 px-4 sm:px-6 lg:px-8">
-        <div className="max-w-7xl mx-auto mt-36">
+        <div className="max-w-7xl mx-auto">
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 lg:gap-12 items-stretch">
             {/* Left Side - Image and Text */}
             <div className="flex flex-col justify-center order-2 lg:order-1">
@@ -333,10 +336,10 @@ export default function SubmitPage() {
       </main>
 
       {/* Footer */}
-      <footer className="bg-black text-white mt-12 sm:mt-16 lg:mt-20">
+      {/* <footer className="bg-black text-white mt-12 sm:mt-16 lg:mt-20">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 sm:py-10 lg:py-12">
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 lg:gap-8">
-            {/* Logo and Description */}
+            
             <div className="space-y-4 col-span-1 sm:col-span-2 lg:col-span-1">
               <Image src="/images/Logo2.svg" alt="Logo" width={120} height={40} className="w-28 sm:w-32" />
               <p className="text-gray-400 text-sm leading-relaxed">
@@ -351,7 +354,7 @@ export default function SubmitPage() {
               </div>
             </div>
 
-            {/* Menu */}
+            
             <div className="col-span-1">
               <h4 className="font-semibold mb-3 sm:mb-4 text-sm sm:text-base">Menu</h4>
               <ul className="space-y-2 text-sm text-gray-400">
@@ -363,7 +366,7 @@ export default function SubmitPage() {
               </ul>
             </div>
 
-            {/* Support */}
+            
             <div className="col-span-1">
               <h4 className="font-semibold mb-3 sm:mb-4 text-sm sm:text-base">Support</h4>
               <ul className="space-y-2 text-sm text-gray-400">
@@ -372,7 +375,7 @@ export default function SubmitPage() {
               </ul>
             </div>
 
-            {/* Social Media */}
+            
             <div className="col-span-1 sm:col-span-2 lg:col-span-1">
               <h4 className="font-semibold mb-3 sm:mb-4 text-sm sm:text-base">Social Media</h4>
               <div className="flex space-x-4">
@@ -396,7 +399,7 @@ export default function SubmitPage() {
             </p>
           </div>
         </div>
-      </footer>
+      </footer> */}
     </div>
   );
 }

@@ -1,7 +1,8 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import Image from 'next/image';
+import Link from 'next/link';
 
 export default function RegisterPage() {
   const [formData, setFormData] = useState({
@@ -9,6 +10,7 @@ export default function RegisterPage() {
     email: '',
     phone: '',
     stravaName: '',
+    packageType: 'starter',
     donationAmount: ''
   });
 
@@ -16,6 +18,22 @@ export default function RegisterPage() {
   const [submitStatus, setSubmitStatus] = useState('');
   const [paymentData, setPaymentData] = useState(null);
   const [redirectCountdown, setRedirectCountdown] = useState(null);
+  const [isDropdownOpen, setIsDropdownOpen] = useState(false);
+  const dropdownRef = useRef(null);
+
+  // Close dropdown when clicking outside
+  useEffect(() => {
+    function handleClickOutside(event) {
+      if (dropdownRef.current && !dropdownRef.current.contains(event.target)) {
+        setIsDropdownOpen(false);
+      }
+    }
+
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+    };
+  }, []);
 
   const handleInputChange = (e) => {
     const { name, value } = e.target;
@@ -23,6 +41,30 @@ export default function RegisterPage() {
       ...prev,
       [name]: value
     }));
+  };
+
+  const handlePackageSelect = (packageType) => {
+    setFormData(prev => ({
+      ...prev,
+      packageType: packageType
+    }));
+    setIsDropdownOpen(false);
+  };
+
+  const getPackageOption = (type) => {
+    if (type === 'starter') {
+      return {
+        value: 'starter',
+        label: '💫 Starter - Rp. 100.000',
+        description: 'Biaya: 80rb + Donasi: 20rb'
+      };
+    } else {
+      return {
+        value: 'full',
+        label: '🌟 Full - Rp. 155.000',
+        description: 'Biaya: 135rb + Donasi: 20rb'
+      };
+    }
   };
 
   const handleSubmit = async (e) => {
@@ -44,7 +86,14 @@ export default function RegisterPage() {
       if (response.ok) {
         setSubmitStatus('success');
         setPaymentData(result);
-        setFormData({ name: '', email: '', phone: '', stravaName: '', donationAmount: '' });
+        setFormData({ 
+          name: '', 
+          email: '', 
+          phone: '', 
+          stravaName: '', 
+          packageType: 'starter',
+          donationAmount: '' 
+        });
         
         // Auto-redirect to payment after 2 seconds
         setTimeout(() => {
@@ -64,6 +113,29 @@ export default function RegisterPage() {
     }
   };
 
+  // Calculate package details
+  const getPackageDetails = () => {
+    if (formData.packageType === 'starter') {
+      return {
+        baseAmount: 80000,
+        fixedDonation: 20000,
+        total: 100000,
+        name: 'Starter'
+      };
+    } else {
+      return {
+        baseAmount: 135000,
+        fixedDonation: 20000,
+        total: 155000,
+        name: 'Full'
+      };
+    }
+  };
+
+  const packageDetails = getPackageDetails();
+  const additionalDonation = parseInt(formData.donationAmount) || 0;
+  const totalAmount = packageDetails.total + additionalDonation;
+
   return (
     <div className="min-h-screen bg-white">
       {/* Header */}
@@ -72,12 +144,14 @@ export default function RegisterPage() {
           <div className="flex justify-between items-center h-16">
             <div className="flex items-center">
               <div className="flex-shrink-0">
-                <Image src="/images/Logo1.svg" alt="Logo" width={100} height={32} className="sm:w-[120px] sm:h-[40px]" />
+                <Link href="https://werunpalestina.framer.website" className="inline-block">
+                  <Image src="/images/Logo1.svg" alt="Logo" width={100} height={32} className="sm:w-[120px] sm:h-[40px] hover:opacity-80 transition-opacity duration-200" />
+                </Link>
               </div>
             </div>
             
             {/* Desktop Navigation */}
-            <div className="hidden lg:block">
+            {/* <div className="hidden lg:block">
               <div className="ml-10 flex items-baseline space-x-6 xl:space-x-8">
                 <a href="https://werunpalestina.framer.website" className="text-gray-900 hover:text-gray-700 px-3 py-2 text-sm font-medium transition-colors">Beranda</a>
                 <a href="#" className="text-gray-900 hover:text-gray-700 px-3 py-2 text-sm font-medium transition-colors">Tentang</a>
@@ -88,23 +162,23 @@ export default function RegisterPage() {
                   Hubungi Kami
                 </button>
               </div>
-            </div>
+            </div> */}
 
             {/* Mobile menu button */}
-            <div className="lg:hidden">
+            {/* <div className="lg:hidden">
               <button className="inline-flex items-center justify-center p-2 rounded-md text-gray-400 hover:text-gray-500 hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-inset focus:ring-green-500">
                 <svg className="h-6 w-6" stroke="currentColor" fill="none" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 6h16M4 12h16M4 18h16" />
                 </svg>
               </button>
-            </div>
+            </div> */}
           </div>
         </nav>
       </header>
 
       {/* Main Content */}
       <main className="pt-20 pb-12 px-4 sm:px-6 lg:px-8">
-        <div className="max-w-7xl mx-auto mt-36">
+        <div className="max-w-7xl mx-auto">
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 lg:gap-12 items-stretch">
             {/* Left Side - Image and Text */}
             <div className="flex flex-col justify-center order-2 lg:order-1">
@@ -132,11 +206,27 @@ export default function RegisterPage() {
                     We Run Palestina (WRP) hadir sebagai charity run untuk
                     menggelang donasi dan memastikan dunia tidak lupa.
                   </p>
-                  <div className="bg-gray-50 border border-gray-200 rounded-xl p-3 sm:p-4 mb-4 sm:mb-6">
-                    <p className="text-black font-semibold text-base sm:text-lg">
-                      Biaya pendaftaran sebesar Rp. 180.000
+                  {/* <div className="bg-gray-50 border border-gray-200 rounded-xl p-3 sm:p-4 mb-4 sm:mb-6">
+                    <p className="text-black font-semibold text-base sm:text-lg mb-2">
+                      Paket {packageDetails.name}: Rp. {packageDetails.total.toLocaleString('id-ID')}
                     </p>
-                  </div>
+                    <div className="text-sm text-gray-600 space-y-1">
+                      <p>• Biaya tetap: Rp. {packageDetails.baseAmount.toLocaleString('id-ID')}</p>
+                      <p>• Donasi tetap untuk Palestina: Rp. {packageDetails.fixedDonation.toLocaleString('id-ID')}</p>
+                    </div>
+                    {additionalDonation > 0 && (
+                      <div className="border-t border-gray-300 mt-2 pt-2">
+                        <p className="text-green-600 font-medium text-sm">
+                          + Donasi tambahan: Rp. {additionalDonation.toLocaleString('id-ID')}
+                        </p>
+                      </div>
+                    )}
+                    <div className="border-t border-gray-300 mt-2 pt-2">
+                      <p className="text-black font-bold text-lg">
+                        Total: Rp. {totalAmount.toLocaleString('id-ID')}
+                      </p>
+                    </div>
+                  </div> */}
                 </div>
 
                 {submitStatus === 'success' && (
@@ -146,15 +236,21 @@ export default function RegisterPage() {
                       ID Pendaftaran: <span className="font-mono">{paymentData?.registrationId}</span>
                     </div>
                     <div className="mb-2">
-                      Biaya Pendaftaran: <span className="font-semibold">Rp 180.000</span>
+                      Paket: <span className="font-semibold">{paymentData?.packageType || 'Starter'}</span>
                     </div>
-                    {paymentData?.totalAmount > 180000 && (
+                    <div className="mb-2">
+                      Biaya Tetap: <span className="font-semibold">Rp {(paymentData?.baseAmount || 80000).toLocaleString('id-ID')}</span>
+                    </div>
+                    <div className="mb-2">
+                      Donasi Tetap: <span className="font-semibold">Rp {(paymentData?.fixedDonation || 20000).toLocaleString('id-ID')}</span>
+                    </div>
+                    {paymentData?.additionalDonation > 0 && (
                       <div className="mb-2">
-                        Donasi: <span className="font-semibold">Rp {((paymentData?.totalAmount || 180000) - 180000).toLocaleString('id-ID')}</span>
+                        Donasi Tambahan: <span className="font-semibold">Rp {(paymentData?.additionalDonation || 0).toLocaleString('id-ID')}</span>
                       </div>
                     )}
                     <div className="mb-3">
-                      <span className="font-bold">Total: Rp {(paymentData?.totalAmount || 180000).toLocaleString('id-ID')}</span>
+                      <span className="font-bold">Total: Rp {(paymentData?.totalAmount || 100000).toLocaleString('id-ID')}</span>
                     </div>
                     <div className="mb-3">
                       {paymentData?.data?.paymentInstructions}
@@ -182,7 +278,7 @@ export default function RegisterPage() {
                           }}
                           className="w-full bg-green-600 text-white py-2 px-4 rounded-lg text-sm font-medium hover:bg-green-700 transition-colors"
                         >
-                          Bayar Sekarang - Rp {(paymentData?.totalAmount || 180000).toLocaleString('id-ID')}
+                          Bayar Sekarang - Rp {(paymentData?.totalAmount || 100000).toLocaleString('id-ID')}
                         </button>
                         {redirectCountdown !== null && (
                           <div className="text-center text-xs text-green-600 mt-2">
@@ -201,6 +297,97 @@ export default function RegisterPage() {
                 )}
 
                 <form onSubmit={handleSubmit} className="space-y-4 sm:space-y-5">
+                  <div className="space-y-2">
+                    <label className="block text-sm font-medium text-gray-700 px-4">
+                      Pilih Paket
+                    </label>
+                    <div className="relative" ref={dropdownRef}>
+                      {/* Custom Dropdown Button */}
+                      <button
+                        type="button"
+                        onClick={() => setIsDropdownOpen(!isDropdownOpen)}
+                        className="w-full px-4 sm:px-6 lg:px-8 py-1 sm:py-2 lg:py-4 text-base sm:text-lg lg:text-xl border-2 border-gray-200 rounded-full focus:ring-2 focus:ring-green-500 focus:border-green-500 outline-none transition-all duration-200 text-gray-900 bg-white cursor-pointer text-left flex items-center justify-between"
+                      >
+                        <span className="flex-1">
+                          {getPackageOption(formData.packageType).label}
+                        </span>
+                        <svg 
+                          className={`w-5 h-5 text-gray-400 transition-transform duration-200 ${isDropdownOpen ? 'rotate-180' : ''}`} 
+                          fill="none" 
+                          stroke="currentColor" 
+                          viewBox="0 0 24 24"
+                        >
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                        </svg>
+                      </button>
+
+                      {/* Custom Dropdown Options */}
+                      {isDropdownOpen && (
+                        <div className="absolute z-10 w-full mt-2 bg-white border-2 border-gray-200 rounded-2xl shadow-lg overflow-hidden">
+                          {/* Starter Option */}
+                          <button
+                            type="button"
+                            onClick={() => handlePackageSelect('starter')}
+                            className={`w-full px-4 sm:px-6 py-3 sm:py-4 text-left hover:bg-gray-50 transition-colors duration-200 border-b border-gray-100 last:border-b-0 ${
+                              formData.packageType === 'starter' ? 'bg-green-50 border-green-200' : ''
+                            }`}
+                          >
+                            <div className="flex items-center space-x-3">
+                              <span className="text-2xl">💫</span>
+                              <div className="flex-1">
+                                <div className="font-semibold text-gray-900 text-base sm:text-lg">
+                                  Starter - Rp. 100.000
+                                </div>
+                                <div className="text-sm text-gray-600">
+                                  Biaya: 80rb + Donasi: 20rb
+                                </div>
+                              </div>
+                              {formData.packageType === 'starter' && (
+                                <svg className="w-5 h-5 text-green-600" fill="currentColor" viewBox="0 0 20 20">
+                                  <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
+                                </svg>
+                              )}
+                            </div>
+                          </button>
+
+                          {/* Full Option */}
+                          <button
+                            type="button"
+                            onClick={() => handlePackageSelect('full')}
+                            className={`w-full px-4 sm:px-6 py-3 sm:py-4 text-left hover:bg-gray-50 transition-colors duration-200 ${
+                              formData.packageType === 'full' ? 'bg-green-50 border-green-200' : ''
+                            }`}
+                          >
+                            <div className="flex items-center space-x-3">
+                              <span className="text-2xl">🌟</span>
+                              <div className="flex-1">
+                                <div className="font-semibold text-gray-900 text-base sm:text-lg">
+                                  Full - Rp. 155.000
+                                </div>
+                                <div className="text-sm text-gray-600">
+                                  Biaya: 135rb + Donasi: 20rb
+                                </div>
+                              </div>
+                              {formData.packageType === 'full' && (
+                                <svg className="w-5 h-5 text-green-600" fill="currentColor" viewBox="0 0 20 20">
+                                  <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
+                                </svg>
+                              )}
+                            </div>
+                          </button>
+                        </div>
+                      )}
+
+                      {/* Hidden input for form submission */}
+                      <input
+                        type="hidden"
+                        name="packageType"
+                        value={formData.packageType}
+                        required
+                      />
+                    </div>
+                  </div>
+
                   <div className="space-y-2">
                     <input
                       type="text"
@@ -250,10 +437,30 @@ export default function RegisterPage() {
                   </div>
 
                   <div className="space-y-2">
+                    <div className="bg-green-50 border border-green-200 rounded-xl p-3 sm:p-4">
+                      <div className="flex items-center">
+                        <div className="flex-shrink-0">
+                          <svg className="h-5 w-5 text-green-600" fill="currentColor" viewBox="0 0 20 20">
+                            <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
+                          </svg>
+                        </div>
+                        <div className="ml-3">
+                          <p className="text-green-800 font-medium text-sm sm:text-base">
+                            Donasi Tetap untuk Palestina: Rp. 20.000
+                          </p>
+                          <p className="text-green-600 text-xs sm:text-sm mt-1">
+                            Sudah termasuk dalam paket yang dipilih
+                          </p>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+
+                  <div className="space-y-2">
                     <input
                       type="number"
                       name="donationAmount"
-                      placeholder="Donasi (Opsional) - Rp"
+                      placeholder="Donasi Tambahan (Opsional) - Rp"
                       value={formData.donationAmount}
                       onChange={handleInputChange}
                       min="0"
@@ -261,7 +468,7 @@ export default function RegisterPage() {
                       className="w-full px-4 sm:px-6 lg:px-8 py-1 sm:py-2 lg:py-4 text-base sm:text-lg lg:text-xl border-2 border-gray-200 rounded-full focus:ring-2 focus:ring-green-500 focus:border-green-500 outline-none transition-all duration-200 text-gray-900 placeholder-gray-500"
                     />
                     <p className="text-xs sm:text-sm text-gray-500 px-4">
-                      Donasi bersifat sukarela untuk mendukung Palestina. Kosongkan jika tidak ingin berdonasi.
+                      Donasi tambahan bersifat sukarela selain donasi tetap Rp. 20.000 yang sudah termasuk.
                     </p>
                   </div>
 
@@ -302,10 +509,9 @@ export default function RegisterPage() {
       </main>
 
       {/* Footer */}
-      <footer className="bg-black text-white mt-12 sm:mt-16 lg:mt-20">
+      {/* <footer className="bg-black text-white mt-12 sm:mt-16 lg:mt-20">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 sm:py-10 lg:py-12">
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 lg:gap-8">
-            {/* Logo and Description */}
             <div className="space-y-4 col-span-1 sm:col-span-2 lg:col-span-1">
               <Image src="/images/Logo2.svg" alt="Logo" width={120} height={40} className="w-28 sm:w-32" />
               <p className="text-gray-400 text-sm leading-relaxed">
@@ -320,7 +526,6 @@ export default function RegisterPage() {
               </div>
             </div>
 
-            {/* Menu */}
             <div className="col-span-1">
               <h4 className="font-semibold mb-3 sm:mb-4 text-sm sm:text-base">Menu</h4>
               <ul className="space-y-2 text-sm text-gray-400">
@@ -332,7 +537,6 @@ export default function RegisterPage() {
               </ul>
             </div>
 
-            {/* Support */}
             <div className="col-span-1">
               <h4 className="font-semibold mb-3 sm:mb-4 text-sm sm:text-base">Support</h4>
               <ul className="space-y-2 text-sm text-gray-400">
@@ -341,7 +545,6 @@ export default function RegisterPage() {
               </ul>
             </div>
 
-            {/* Social Media */}
             <div className="col-span-1 sm:col-span-2 lg:col-span-1">
               <h4 className="font-semibold mb-3 sm:mb-4 text-sm sm:text-base">Social Media</h4>
               <div className="flex space-x-4">
@@ -365,7 +568,7 @@ export default function RegisterPage() {
             </p>
           </div>
         </div>
-      </footer>
+      </footer> */}
     </div>
   );
 }

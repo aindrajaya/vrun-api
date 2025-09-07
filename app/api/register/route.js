@@ -12,7 +12,10 @@ const MIDTRANS_API_URL = process.env.MIDTRANS_API_URL || 'https://api.sandbox.mi
 
 /**
  * Creates a dynamic payment link using Midtrans API
- * @param {Object} registrationData - Registration data
+ *      totalAmount: parseFloat(row[13]) || 120000,
+      donationDate: row[14] || '',
+      paymentLink: row[15] || '',
+      midtransOrderId: row[16] || ''ram {Object} registrationData - Registration data
  * @param {number} totalAmount - Total amount including donation
  * @returns {Promise<Object>} - Object containing payment link URL and order ID
  */
@@ -65,22 +68,79 @@ async function createMidtransPaymentLink(registrationData, totalAmount = 180000)
       phoneNumber = '62' + phoneNumber;
     }
 
-    // Ensure totalAmount is a valid number
-    const validTotalAmount = Math.max(parseInt(totalAmount) || 180000, 180000);
+    // Calculate package amounts
+    const packageType = registrationData.packageType || 'starter';
+    const baseAmount = packageType === 'starter' ? 80000 : 135000;
+    const fixedDonation = 20000;
+    const additionalDonation = registrationData.additionalDonation || 0;
+    
+    // Calculate the actual total amount including additional donation
+    const actualTotalAmount = baseAmount + fixedDonation + additionalDonation;
+    const packageTotal = baseAmount + fixedDonation;
+    
+    // Use the actual calculated total, but ensure it's at least the package minimum
+    const validTotalAmount = Math.max(actualTotalAmount, packageTotal);
     
     console.log('Payment data validation:', {
-      originalTotalAmount: totalAmount,
-      validTotalAmount: validTotalAmount,
+      packageType: packageType,
+      baseAmount: baseAmount,
+      fixedDonation: fixedDonation,
+      packageTotal: packageTotal,
+      additionalDonation: additionalDonation,
+      actualTotalAmount: actualTotalAmount,
+      originalTotalAmountParam: totalAmount,
+      finalValidTotalAmount: validTotalAmount,
       registrationId: registrationData.id,
       paymentLinkId: paymentLinkId,
       orderId: orderId
+    });
+
+    // Build item_details array first
+    const itemDetails = [
+      {
+        id: "wrp-base-amount",
+        name: `WRP - Biaya Tetap Paket ${packageType.charAt(0).toUpperCase() + packageType.slice(1)}`,
+        price: baseAmount,
+        quantity: 1
+      },
+      {
+        id: "wrp-fixed-donation",
+        name: "Donasi Tetap untuk Palestina",
+        price: fixedDonation,
+        quantity: 1
+      }
+    ];
+
+    // Add additional donation item if there's any additional donation
+    if (additionalDonation > 0) {
+      itemDetails.push({
+        id: "wrp-additional-donation",
+        name: "Donasi Tambahan untuk Palestina", 
+        price: additionalDonation,
+        quantity: 1
+      });
+    }
+
+    // Calculate gross_amount as exact sum of all item_details
+    const calculatedGrossAmount = itemDetails.reduce((total, item) => {
+      return total + (item.price * item.quantity);
+    }, 0);
+
+    console.log('Payment calculation verification:', {
+      baseAmount: baseAmount,
+      fixedDonation: fixedDonation,
+      additionalDonation: additionalDonation,
+      calculatedTotalFromItems: calculatedGrossAmount,
+      shouldMatchCalculatedTotal: actualTotalAmount,
+      originalValidTotalAmount: validTotalAmount,
+      itemDetails: itemDetails
     });
 
     // Midtrans Payment Links API format
     const paymentData = {
       transaction_details: {
         order_id: orderId,
-        gross_amount: validTotalAmount
+        gross_amount: calculatedGrossAmount
       },
       credit_card: {
         secure: true
@@ -91,14 +151,7 @@ async function createMidtransPaymentLink(registrationData, totalAmount = 180000)
         email: registrationData.email,
         phone: phoneNumber
       },
-      item_details: [
-        {
-          id: "wrp-registration",
-          name: "WRP - Biaya Pendaftaran",
-          price: 180000,
-          quantity: 1
-        }
-      ],
+      item_details: itemDetails,
       callbacks: {
         finish: process.env.PAYMENT_SUCCESS_URL || 'https://werunpalestina.framer.website/',
         error: process.env.PAYMENT_ERROR_URL || 'https://werunpalestina.framer.website/register?error=payment_failed',
@@ -114,17 +167,6 @@ async function createMidtransPaymentLink(registrationData, totalAmount = 180000)
       }
     };
 
-    // Add donation item if validTotalAmount > 180000
-    if (validTotalAmount > 180000) {
-      const donationAmount = validTotalAmount - 180000;
-      paymentData.item_details.push({
-        id: "wrp-donation",
-        name: "Donasi untuk Palestina",
-        price: donationAmount,
-        quantity: 1
-      });
-    }
-
     // Final validation before sending to Midtrans
     if (!paymentData.transaction_details?.gross_amount || !paymentData.transaction_details?.order_id) {
       console.error('Critical payment data missing:', {
@@ -135,13 +177,32 @@ async function createMidtransPaymentLink(registrationData, totalAmount = 180000)
       throw new Error('Critical payment data is missing');
     }
 
+    // Verify gross_amount matches item_details total
+    const itemDetailsTotal = paymentData.item_details.reduce((total, item) => total + (item.price * item.quantity), 0);
+    if (paymentData.transaction_details.gross_amount !== itemDetailsTotal) {
+      console.error('Amount mismatch detected:', {
+        gross_amount: paymentData.transaction_details.gross_amount,
+        item_details_total: itemDetailsTotal,
+        difference: paymentData.transaction_details.gross_amount - itemDetailsTotal
+      });
+      // Fix the gross_amount to match item_details
+      paymentData.transaction_details.gross_amount = itemDetailsTotal;
+    }
+
     // Create auth header
     const authString = Buffer.from(`${MIDTRANS_SERVER_KEY}:`).toString('base64');
     
     // Use Midtrans Payment Links API
     console.log('Sending request to Midtrans Payment Links API:', {
       url: `${MIDTRANS_API_URL}/v1/payment-links`,
-      paymentData: JSON.stringify(paymentData, null, 2)
+      gross_amount: paymentData.transaction_details.gross_amount,
+      item_details_breakdown: paymentData.item_details.map(item => ({
+        name: item.name,
+        price: item.price,
+        quantity: item.quantity,
+        total: item.price * item.quantity
+      })),
+      item_details_sum: paymentData.item_details.reduce((sum, item) => sum + (item.price * item.quantity), 0)
     });
     
     const response = await fetch(`${MIDTRANS_API_URL}/v1/payment-links`, {
@@ -205,7 +266,7 @@ async function checkDuplicateEmail(email) {
     const sheets = await getGoogleSheetsClient();
     const response = await sheets.spreadsheets.values.get({
       spreadsheetId: SPREADSHEET_ID,
-      range: `${SHEET_NAME}!D:D`, // Column D contains emails
+      range: `${SHEET_NAME}!D:D`, // Column D contains emails (unchanged)
     });
 
     const existingEmails = response.data.values ? response.data.values.flat().map(e => e.toLowerCase()) : [];
@@ -261,10 +322,13 @@ async function storeRegistrationInGoogleSheets(registrationData) {
             'email',
             'phone',
             'stravaName',
+            'packageType',
+            'baseAmount',
+            'fixedDonation',
+            'additionalDonation',
             'registrationDate',
             'status',
             'paymentStatus',
-            'donationAmount',
             'totalAmount',
             'donationDate',
             'paymentLink',
@@ -277,7 +341,18 @@ async function storeRegistrationInGoogleSheets(registrationData) {
                 return new Date().toISOString(); // Add current timestamp
             }
             if(key === 'totalAmount') {
-                return (registrationData.donationAmount || 0) + 180000; // Base amount + donation
+                const packageType = registrationData.packageType || 'starter';
+                const baseAmount = packageType === 'starter' ? 80000 : 135000;
+                const fixedDonation = 20000;
+                const additionalDonation = registrationData.additionalDonation || 0;
+                return baseAmount + fixedDonation + additionalDonation;
+            }
+            if(key === 'baseAmount') {
+                const packageType = registrationData.packageType || 'starter';
+                return packageType === 'starter' ? 80000 : 135000;
+            }
+            if(key === 'fixedDonation') {
+                return 20000;
             }
             return registrationData[key] !== undefined ? registrationData[key] : '';
         })];
@@ -289,7 +364,7 @@ async function storeRegistrationInGoogleSheets(registrationData) {
         try {
             const response = await sheets.spreadsheets.values.get({
                 spreadsheetId: SPREADSHEET_ID,
-                range: `${SHEET_NAME}!A1:N1`,
+                range: `${SHEET_NAME}!A1:Q1`,
             });
 
             // If sheet is empty, add headers
@@ -302,10 +377,13 @@ async function storeRegistrationInGoogleSheets(registrationData) {
                     'Email',
                     'Phone',
                     'Strava Name',
+                    'Package Type',
+                    'Base Amount',
+                    'Fixed Donation',
+                    'Additional Donation',
                     'Registration Date',
                     'Status',
                     'Payment Status',
-                    'Donation Amount',
                     'Total Amount', 
                     'Donation Date',
                     'Payment Link',
@@ -314,7 +392,7 @@ async function storeRegistrationInGoogleSheets(registrationData) {
 
                 await sheets.spreadsheets.values.update({
                     spreadsheetId: SPREADSHEET_ID,
-                    range: `${SHEET_NAME}!A1:N1`,
+                    range: `${SHEET_NAME}!A1:Q1`,
                     valueInputOption: 'USER_ENTERED',
                     resource: {
                         values: [headers],
@@ -385,10 +463,10 @@ export async function POST(request) {
     const body = await request.json();
     console.log('Request body received:', body);
     
-    const { name, email, phone, stravaName, donationAmount } = body;
+    const { name, email, phone, stravaName, packageType, donationAmount } = body;
 
     // Validate required fields
-    if (!name || !email || !phone || !stravaName) {
+    if (!name || !email || !phone || !stravaName || !packageType) {
       console.log('Validation failed: missing required fields');
       return NextResponse.json(
         { error: 'All fields are required' },
@@ -408,14 +486,22 @@ export async function POST(request) {
 
     console.log('Validation passed, creating registration object...');
 
-    // Parse and validate donation amount
-    const donation = parseFloat(donationAmount) || 0;
-    const totalAmount = 180000 + donation;
+    // Calculate package amounts
+    const packageTypeValue = packageType || 'starter';
+    const baseAmount = packageTypeValue === 'starter' ? 80000 : 135000;
+    const fixedDonation = 20000;
+    const additionalDonation = parseFloat(donationAmount) || 0;
+    const packageTotal = baseAmount + fixedDonation; // This is the package price (100000 or 155000)
+    const totalAmount = packageTotal + additionalDonation;
     
     console.log('Registration details:', {
       name: name.trim(),
       email: email.trim(),
-      donationAmount: donation,
+      packageType: packageTypeValue,
+      baseAmount: baseAmount,
+      fixedDonation: fixedDonation,
+      packageTotal: packageTotal,
+      additionalDonation: additionalDonation,
       totalAmount: totalAmount
     });
 
@@ -426,11 +512,14 @@ export async function POST(request) {
       email: email.trim().toLowerCase(),
       phone: phone.trim(),
       stravaName: stravaName.trim(),
+      packageType: packageTypeValue,
+      baseAmount: baseAmount,
+      fixedDonation: fixedDonation,
+      additionalDonation: additionalDonation,
       registrationDate: new Date().toISOString(),
       status: 'pending',
       paymentStatus: 'unpaid',
-      donationAmount: donation,
-      donationDate: donation > 0 ? new Date().toISOString() : null,
+      donationDate: new Date().toISOString(),
       paymentLink: null,
       midtransOrderId: null
     };
@@ -482,18 +571,23 @@ export async function POST(request) {
       message: 'Registration successful',
       registrationId: registration.id,
       paymentLink: paymentResult.paymentUrl,
+      packageType: packageTypeValue,
+      baseAmount: baseAmount,
+      fixedDonation: fixedDonation,
+      additionalDonation: additionalDonation,
       totalAmount: totalAmount,
-      donationAmount: donation,
       data: {
         name: registration.name,
         email: registration.email,
         registrationDate: registration.registrationDate,
-        paymentAmount: 180000,
+        packageType: packageTypeValue,
+        baseAmount: baseAmount,
+        fixedDonation: fixedDonation,
+        additionalDonation: additionalDonation,
         totalAmount: totalAmount,
-        donationAmount: donation,
-        paymentInstructions: donation > 0 
-          ? `Silakan lanjutkan ke link pembayaran untuk menyelesaikan pendaftaran Anda (Rp ${totalAmount.toLocaleString('id-ID')} termasuk donasi).`
-          : 'Silakan lanjutkan ke link pembayaran untuk menyelesaikan pendaftaran Anda.'
+        paymentInstructions: additionalDonation > 0 
+          ? `Silakan lanjutkan ke link pembayaran untuk menyelesaikan pendaftaran Anda (Rp ${totalAmount.toLocaleString('id-ID')} termasuk donasi tambahan).`
+          : `Silakan lanjutkan ke link pembayaran untuk menyelesaikan pendaftaran Anda (Rp ${totalAmount.toLocaleString('id-ID')} sudah termasuk donasi tetap Rp 20.000).`
       }
     });
 
@@ -518,7 +612,7 @@ export async function GET(request) {
     const sheets = await getGoogleSheetsClient();
     const response = await sheets.spreadsheets.values.get({
       spreadsheetId: SPREADSHEET_ID,
-      range: `${SHEET_NAME}!A2:N1000`, // Skip header row, get up to 1000 rows
+      range: `${SHEET_NAME}!A2:Q1000`, // Skip header row, get up to 1000 rows (now up to column Q)
     });
 
     const rows = response.data.values || [];
@@ -532,11 +626,14 @@ export async function GET(request) {
       email: row[3] || '',
       phone: row[4] || '',
       stravaName: row[5] || '',
-      registrationDate: row[6] || '',
-      status: row[7] || 'pending',
-      paymentStatus: row[8] || 'unpaid',
-      donationAmount: parseFloat(row[9]) || 0,
-      totalAmount: parseFloat(row[10]) || 180000,
+      packageType: row[6] || 'starter',
+      baseAmount: parseFloat(row[7]) || 80000,
+      fixedDonation: parseFloat(row[8]) || 20000,
+      additionalDonation: parseFloat(row[9]) || 0,
+      registrationDate: row[10] || '',
+      status: row[11] || 'pending',
+      paymentStatus: row[12] || 'unpaid',
+      totalAmount: parseFloat(row[13]) || 100000,
       donationDate: row[11] || null,
       paymentLink: row[12] || '',
       midtransOrderId: row[13] || ''

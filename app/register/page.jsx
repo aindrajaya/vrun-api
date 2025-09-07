@@ -15,6 +15,7 @@ export default function RegisterPage() {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [submitStatus, setSubmitStatus] = useState('');
   const [paymentData, setPaymentData] = useState(null);
+  const [redirectCountdown, setRedirectCountdown] = useState(null);
 
   const handleInputChange = (e) => {
     const { name, value } = e.target;
@@ -164,11 +165,30 @@ export default function RegisterPage() {
                           Anda akan diarahkan ke halaman pembayaran dalam 2 detik...
                         </div>
                         <button
-                          onClick={() => window.open(paymentData.paymentLink, '_blank')}
+                          onClick={() => {
+                            window.open(paymentData.paymentLink, '_blank');
+                            // Start countdown
+                            setRedirectCountdown(6);
+                            const countdownInterval = setInterval(() => {
+                              setRedirectCountdown((prev) => {
+                                if (prev <= 1) {
+                                  clearInterval(countdownInterval);
+                                  window.location.href = 'https://werunpalestina.framer.website';
+                                  return 0;
+                                }
+                                return prev - 1;
+                              });
+                            }, 1000);
+                          }}
                           className="w-full bg-green-600 text-white py-2 px-4 rounded-lg text-sm font-medium hover:bg-green-700 transition-colors"
                         >
                           Bayar Sekarang - Rp {(paymentData?.totalAmount || 180000).toLocaleString('id-ID')}
                         </button>
+                        {redirectCountdown !== null && (
+                          <div className="text-center text-xs text-green-600 mt-2">
+                            Anda akan diarahkan kembali ke halaman utama dalam {redirectCountdown} detik...
+                          </div>
+                        )}
                       </div>
                     )}
                   </div>

@@ -12,6 +12,87 @@ const SCOPES = ['https://www.googleapis.com/auth/spreadsheets'];
 // Midtrans configuration
 const MIDTRANS_SERVER_KEY = process.env.MIDTRANS_SERVER_KEY;
 
+// n8n webhook configuration
+const N8N_WEBHOOK_URL = process.env.N8N_WEBHOOK_URL || 'https://n8n-oo1yqkmi2l7g.blueberry.sumopod.my.id/webhook/f0aae5da-7ca3-4c2c-af78-500367bde5d2';
+
+/**
+ * Sends payment success notification to n8n webhook
+ * @param {Object} paymentData - Payment data from Midtrans
+ * @param {Object} registrationData - Registration data from local/sheets
+ * @returns {Promise<Object>} - n8n webhook response
+ */
+async function sendPaymentSuccessToN8n(paymentData, registrationData = null) {
+    try {
+        console.log('Sending payment success notification to n8n...');
+        
+        const webhookPayload = {
+            event: 'payment_success',
+            timestamp: new Date().toISOString(),
+            payment: {
+                order_id: paymentData.order_id,
+                transaction_status: paymentData.transaction_status,
+                payment_type: paymentData.payment_type,
+                gross_amount: paymentData.gross_amount,
+                fraud_status: paymentData.fraud_status
+            },
+            registration: registrationData ? {
+                id: registrationData.id,
+                name: registrationData.name,
+                email: registrationData.email,
+                phone: registrationData.phone,
+                stravaName: registrationData.stravaName,
+                donationAmount: registrationData.donationAmount,
+                totalAmount: registrationData.totalAmount || parseInt(paymentData.gross_amount),
+                registrationDate: registrationData.registrationDate
+            } : null
+        };
+
+        // Prepare headers
+        const headers = {
+            'Content-Type': 'application/json',
+            'User-Agent': 'WRP-Webhook/1.0'
+        };
+
+        console.log('Sending to n8n:', {
+            url: N8N_WEBHOOK_URL,
+            payload: JSON.stringify(webhookPayload, null, 2)
+        });
+
+        const response = await fetch(N8N_WEBHOOK_URL, {
+            method: 'POST',
+            headers: headers,
+            body: JSON.stringify(webhookPayload),
+            signal: AbortSignal.timeout(10000) // 10 second timeout
+        });
+
+        const responseText = await response.text();
+        
+        if (response.ok) {
+            console.log('✅ n8n webhook called successfully:', response.status);
+            console.log('n8n response:', responseText);
+            return { 
+                success: true, 
+                status: response.status,
+                response: responseText 
+            };
+        } else {
+            console.error('❌ n8n webhook failed:', response.status, responseText);
+            return { 
+                success: false, 
+                status: response.status,
+                error: responseText 
+            };
+        }
+
+    } catch (error) {
+        console.error('Error calling n8n webhook:', error.message);
+        return { 
+            success: false, 
+            error: error.message 
+        };
+    }
+}
+
 /**
  * Gets an authenticated Google Sheets client
  * @returns {Promise<Object>} - Authenticated Google Sheets client
@@ -352,6 +433,23 @@ export async function POST(request) {
             // Update Google Sheets
             const sheetsResult = await updateRegistrationInGoogleSheets(order_id, transaction_status, payment_type);
             console.log('Sheets update result:', sheetsResult);
+
+            // Call n8n webhook for successful payments
+            if ((transaction_status === 'capture' || transaction_status === 'settlement') && 
+                (localResult.success || sheetsResult.success)) {
+                
+                console.log('🎉 Payment successful, calling n8n webhook...');
+                
+                const registrationData = localResult.success ? localResult.registration : null;
+                const n8nResult = await sendPaymentSuccessToN8n(notification, registrationData);
+                console.log('n8n webhook result:', n8nResult);
+                
+                if (n8nResult.success) {
+                    console.log('✅ n8n notification sent successfully');
+                } else {
+                    console.warn('⚠️ n8n notification failed, but continuing...');
+                }
+            }
 
             // Log the results
             if (localResult.success && sheetsResult.success) {

@@ -1,6 +1,4 @@
 import { NextResponse } from 'next/server';
-import fs from 'fs';
-import path from 'path';
 import { google } from 'googleapis';
 
 // Google Sheets API configuration
@@ -19,6 +17,12 @@ const MIDTRANS_API_URL = process.env.MIDTRANS_API_URL || 'https://api.sandbox.mi
  * @returns {Promise<Object>} - Object containing payment link URL and order ID
  */
 async function createMidtransPaymentLink(registrationData, totalAmount = 180000) {
+  // Validate and sanitize inputs
+  if (!totalAmount || isNaN(totalAmount) || totalAmount <= 0) {
+    console.error('Invalid totalAmount provided:', totalAmount);
+    totalAmount = 180000; // Default fallback
+  }
+
   if (!MIDTRANS_SERVER_KEY) {
     console.warn('Midtrans server key not configured, using static payment link');
     return {
@@ -31,7 +35,8 @@ async function createMidtransPaymentLink(registrationData, totalAmount = 180000)
     console.log('Creating Midtrans payment link for:', {
       name: registrationData.name,
       email: registrationData.email,
-      totalAmount: totalAmount
+      totalAmount: totalAmount,
+      totalAmountType: typeof totalAmount
     });
 
     const orderIdSuffix = Date.now().toString();
@@ -43,83 +48,85 @@ async function createMidtransPaymentLink(registrationData, totalAmount = 180000)
     const firstName = nameParts[0] || 'Customer';
     const lastName = nameParts.slice(1).join(' ') || '';
 
+    // Validate required fields for Midtrans
+    if (!registrationData.email || !registrationData.phone || !registrationData.name) {
+      console.error('Missing required fields for Midtrans payment link');
+      return {
+        paymentUrl: process.env.MIDTRANS_PAYMENT_LINK || 'https://app.sandbox.midtrans.com/payment-links/ydsf-run',
+        orderId: null
+      };
+    }
+
+    // Ensure phone number is in correct format
+    let phoneNumber = registrationData.phone.replace(/\D/g, ''); // Remove non-digits
+    if (phoneNumber.startsWith('0')) {
+      phoneNumber = '62' + phoneNumber.substring(1); // Convert to international format
+    } else if (!phoneNumber.startsWith('62')) {
+      phoneNumber = '62' + phoneNumber;
+    }
+
+    // Ensure totalAmount is a valid number
+    const validTotalAmount = Math.max(parseInt(totalAmount) || 180000, 180000);
+    
+    console.log('Payment data validation:', {
+      originalTotalAmount: totalAmount,
+      validTotalAmount: validTotalAmount,
+      registrationId: registrationData.id,
+      paymentLinkId: paymentLinkId,
+      orderId: orderId
+    });
+
+    // Midtrans Payment Links API format
     const paymentData = {
       transaction_details: {
         order_id: orderId,
-        gross_amount: totalAmount,
-        payment_link_id: paymentLinkId
+        gross_amount: validTotalAmount
       },
-      customer_required: false, // We already have customer details
+      credit_card: {
+        secure: true
+      },
       customer_details: {
         first_name: firstName,
         last_name: lastName,
         email: registrationData.email,
-        phone: registrationData.phone,
-        notes: totalAmount > 180000 
-          ? `Pendaftaran We Run Palestina dengan donasi - ${registrationData.name}. Terima kasih atas dukungan Anda untuk Palestina.`
-          : `Pendaftaran We Run Palestina - ${registrationData.name}. Terima kasih atas partisipasi Anda dalam mendukung Palestina.`,
-        customer_details_required_fields: ["first_name", "email", "phone"]
+        phone: phoneNumber
       },
       item_details: [
         {
           id: "wrp-registration",
           name: "WRP - Biaya Pendaftaran",
           price: 180000,
-          quantity: 1,
-          brand: "WRP",
-          category: "Virtual Run",
-          merchant_name: "WRP"
+          quantity: 1
         }
-      ],
-      title: "WRP - Pembayaran Pendaftaran",
-      usage_limit: 1,
-      expiry: {
-        duration: 7,
-        unit: "days"
-      },
-      enabled_payments: [
-        "credit_card",
-        "bca_va",
-        "bni_va",
-        "bri_va",
-        "permata_va",
-        "other_va",
-        "gopay",
-        "shopeepay",
-        "qris",
-        "indomaret",
-        "alfamart"
-      ],
-      custom_field1: `Registration ID: ${registrationData.id}`,
-      custom_field2: `Strava Name: ${registrationData.stravaName}`,
-      custom_field3: `Registration Date: ${registrationData.registrationDate}`,
-      callbacks: {
-        finish: "https://yourwebsite.com/registration-success"
-      }
+      ]
     };
 
-    // Add donation item and update title if totalAmount > 180000
-    if (totalAmount > 180000) {
-      const donationAmount = totalAmount - 180000;
+    // Add donation item if validTotalAmount > 180000
+    if (validTotalAmount > 180000) {
+      const donationAmount = validTotalAmount - 180000;
       paymentData.item_details.push({
         id: "wrp-donation",
         name: "Donasi untuk Palestina",
         price: donationAmount,
-        quantity: 1,
-        brand: "WRP",
-        category: "Donation",
-        merchant_name: "WRP"
+        quantity: 1
       });
-      
-      // Update title to include donation
-      paymentData.title = "WRP - Pembayaran & Donasi";
-      paymentData.custom_field3 = `Donasi: Rp ${donationAmount.toLocaleString('id-ID')}`;
+    }
+
+    // Final validation before sending to Midtrans
+    if (!paymentData.transaction_details?.gross_amount || !paymentData.transaction_details?.order_id) {
+      console.error('Critical payment data missing:', {
+        gross_amount: paymentData.transaction_details?.gross_amount,
+        order_id: paymentData.transaction_details?.order_id,
+        transaction_details: paymentData.transaction_details
+      });
+      throw new Error('Critical payment data is missing');
     }
 
     // Create auth header
     const authString = Buffer.from(`${MIDTRANS_SERVER_KEY}:`).toString('base64');
     
-    console.log('Sending request to Midtrans API:', {
+    // Use Midtrans Payment Links API
+    console.log('Sending request to Midtrans Payment Links API:', {
       url: `${MIDTRANS_API_URL}/v1/payment-links`,
       paymentData: JSON.stringify(paymentData, null, 2)
     });
@@ -139,6 +146,7 @@ async function createMidtransPaymentLink(registrationData, totalAmount = 180000)
     
     console.log('Midtrans API response:', {
       status: response.status,
+      statusText: response.statusText,
       result: result
     });
 
@@ -149,21 +157,49 @@ async function createMidtransPaymentLink(registrationData, totalAmount = 180000)
         orderId: orderId
       };
     } else {
-      console.error('Failed to create Midtrans payment link:', result);
+      console.error('Failed to create Midtrans payment link:', {
+        status: response.status,
+        statusText: response.statusText,
+        error: result
+      });
+      
       // Fallback to static link
       return {
-        paymentUrl: process.env.MIDTRANS_PAYMENT_LINK || 'https://app.midtrans.com/payment-links/ydsf-run',
+        paymentUrl: process.env.MIDTRANS_PAYMENT_LINK || 'https://app.sandbox.midtrans.com/payment-links/ydsf-run',
         orderId: null
       };
     }
 
   } catch (error) {
     console.error('Error creating Midtrans payment link:', error);
-    // Fallback to static link
+    
+    // Final fallback - just use static payment link
+    console.log('Using static payment link as final fallback');
     return {
-      paymentUrl: process.env.MIDTRANS_PAYMENT_LINK || 'https://app.midtrans.com/payment-links/ydsf-run',
+      paymentUrl: process.env.MIDTRANS_PAYMENT_LINK || 'https://app.sandbox.midtrans.com/payment-links/ydsf-run',
       orderId: null
     };
+  }
+}
+
+/**
+ * Checks if an email already exists in Google Sheets
+ * @param {string} email - Email to check
+ * @returns {Promise<boolean>} - True if email exists, false otherwise
+ */
+async function checkDuplicateEmail(email) {
+  try {
+    const sheets = await getGoogleSheetsClient();
+    const response = await sheets.spreadsheets.values.get({
+      spreadsheetId: SPREADSHEET_ID,
+      range: `${SHEET_NAME}!D:D`, // Column D contains emails
+    });
+
+    const existingEmails = response.data.values ? response.data.values.flat().map(e => e.toLowerCase()) : [];
+    return existingEmails.includes(email.toLowerCase());
+  } catch (error) {
+    console.error('Error checking duplicate email:', error);
+    return false; // If check fails, allow registration to proceed
   }
 }
 
@@ -386,38 +422,21 @@ export async function POST(request) {
       midtransOrderId: null
     };
 
-    // Save to local file (in production, you'd save to a database)
-    console.log('Reading/creating local registrations file...');
-    const dataPath = path.join(process.cwd(), 'registrations.json');
-    let registrations = [];
-    
+    // Check for duplicate email in Google Sheets
+    console.log('Checking for duplicate email in Google Sheets...');
     try {
-      if (fs.existsSync(dataPath)) {
-        const data = fs.readFileSync(dataPath, 'utf8');
-        registrations = JSON.parse(data);
-        console.log(`Found ${registrations.length} existing registrations`);
+      const isDuplicate = await checkDuplicateEmail(registration.email);
+      if (isDuplicate) {
+        console.log('Duplicate email found in Google Sheets, returning error');
+        return NextResponse.json(
+          { error: 'Email already registered' },
+          { status: 409 }
+        );
       }
     } catch (error) {
-      console.log('No existing registrations file, creating new one');
+      console.error('Error checking for duplicate email:', error);
+      // Continue with registration if duplicate check fails
     }
-
-    // Check for duplicate email
-    console.log('Checking for duplicate email...');
-    const existingRegistration = registrations.find(reg => reg.email === registration.email);
-    if (existingRegistration) {
-      console.log('Duplicate email found, returning error');
-      return NextResponse.json(
-        { error: 'Email already registered' },
-        { status: 409 }
-      );
-    }
-
-    // Add new registration
-    registrations.push(registration);
-
-    // Save to file
-    console.log('Saving registration to local file...');
-    fs.writeFileSync(dataPath, JSON.stringify(registrations, null, 2));
 
     console.log('New registration saved:', registration);
 
@@ -430,15 +449,7 @@ export async function POST(request) {
     registration.paymentLink = paymentResult.paymentUrl;
     registration.midtransOrderId = paymentResult.orderId;
 
-    // Update the registration in the file with payment info
-    console.log('Updating registration with payment info...');
-    const updatedRegistrationIndex = registrations.findIndex(reg => reg.id === registration.id);
-    if (updatedRegistrationIndex !== -1) {
-      registrations[updatedRegistrationIndex] = registration;
-      fs.writeFileSync(dataPath, JSON.stringify(registrations, null, 2));
-    }
-
-    // Auto-update Google Sheet with complete registration data including payment info
+    // Store registration in Google Sheets with complete payment info
     console.log('Storing registration in Google Sheets...');
     try {
       const sheetsResult = await storeRegistrationInGoogleSheets(registration);
@@ -484,21 +495,39 @@ export async function POST(request) {
 
 /**
  * GET /api/register
- * Get all registrations (admin only)
+ * Get all registrations from Google Sheets (admin only)
  */
 export async function GET(request) {
   try {
-    const dataPath = path.join(process.cwd(), 'registrations.json');
+    console.log('Fetching registrations from Google Sheets...');
     
-    if (!fs.existsSync(dataPath)) {
-      return NextResponse.json({
-        registrations: [],
-        total: 0
-      });
-    }
+    // Get registrations from Google Sheets
+    const sheets = await getGoogleSheetsClient();
+    const response = await sheets.spreadsheets.values.get({
+      spreadsheetId: SPREADSHEET_ID,
+      range: `${SHEET_NAME}!A2:N1000`, // Skip header row, get up to 1000 rows
+    });
 
-    const data = fs.readFileSync(dataPath, 'utf8');
-    const registrations = JSON.parse(data);
+    const rows = response.data.values || [];
+    console.log(`Found ${rows.length} registrations in Google Sheets`);
+
+    // Convert rows back to registration objects
+    const registrations = rows.map(row => ({
+      timestamp: row[0] || '',
+      id: row[1] || '',
+      name: row[2] || '',
+      email: row[3] || '',
+      phone: row[4] || '',
+      stravaName: row[5] || '',
+      registrationDate: row[6] || '',
+      status: row[7] || 'pending',
+      paymentStatus: row[8] || 'unpaid',
+      donationAmount: parseFloat(row[9]) || 0,
+      totalAmount: parseFloat(row[10]) || 180000,
+      donationDate: row[11] || null,
+      paymentLink: row[12] || '',
+      midtransOrderId: row[13] || ''
+    })).filter(reg => reg.id); // Filter out empty rows
 
     // Return summary without sensitive data
     const summary = registrations.map(reg => ({
@@ -507,7 +536,9 @@ export async function GET(request) {
       stravaName: reg.stravaName,
       registrationDate: reg.registrationDate,
       status: reg.status,
-      paymentStatus: reg.paymentStatus
+      paymentStatus: reg.paymentStatus,
+      donationAmount: reg.donationAmount,
+      totalAmount: reg.totalAmount
     }));
 
     return NextResponse.json({
@@ -515,14 +546,15 @@ export async function GET(request) {
       total: registrations.length,
       stats: {
         pending: registrations.filter(r => r.status === 'pending').length,
-        confirmed: registrations.filter(r => r.status === 'confirmed').length,
+        active: registrations.filter(r => r.status === 'active').length,
         paid: registrations.filter(r => r.paymentStatus === 'paid').length,
-        unpaid: registrations.filter(r => r.paymentStatus === 'unpaid').length
+        unpaid: registrations.filter(r => r.paymentStatus === 'unpaid').length,
+        totalDonations: registrations.reduce((sum, r) => sum + (r.donationAmount || 0), 0)
       }
     });
 
   } catch (error) {
-    console.error('Error fetching registrations:', error);
+    console.error('Error fetching registrations from Google Sheets:', error);
     return NextResponse.json(
       { error: 'Internal server error' },
       { status: 500 }

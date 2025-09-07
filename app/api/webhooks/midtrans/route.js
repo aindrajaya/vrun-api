@@ -116,6 +116,58 @@ async function getGoogleSheetsClient() {
 }
 
 /**
+ * Gets registration data from Google Sheets by order ID
+ * @param {string} orderId - Midtrans order ID
+ * @returns {Promise<Object>} - Registration data or null
+ */
+async function getRegistrationFromGoogleSheets(orderId) {
+    try {
+        const sheets = await getGoogleSheetsClient();
+        
+        // Get all registration data
+        const response = await sheets.spreadsheets.values.get({
+            spreadsheetId: SPREADSHEET_ID,
+            range: `${SHEET_NAME}!A:K`, // Get all columns including orderId
+        });
+
+        const rows = response.data.values || [];
+        console.log(`Searching for order ID: ${orderId} in ${rows.length} rows`);
+
+        // Find registration by order ID (should be in column K)
+        for (let i = 1; i < rows.length; i++) { // Skip header row
+            const row = rows[i];
+            const rowOrderId = row[10]; // Column K (0-indexed = 10)
+            
+            if (rowOrderId === orderId) {
+                console.log(`Found registration at row ${i + 1}:`, row);
+                
+                return {
+                    id: `REG-${Date.now()}-${i}`,
+                    name: row[0] || '', // Column A
+                    email: row[1] || '', // Column B
+                    phone: row[2] || '', // Column C
+                    stravaName: row[3] || '', // Column D
+                    donationAmount: parseFloat(row[4]) || 0, // Column E
+                    totalAmount: parseFloat(row[5]) || 0, // Column F
+                    registrationDate: row[6] || '', // Column G
+                    status: row[7] || 'pending', // Column H
+                    paymentStatus: row[8] || 'pending', // Column I
+                    paymentLink: row[9] || '', // Column J
+                    orderId: row[10] || '' // Column K
+                };
+            }
+        }
+
+        console.log(`No registration found for order ID: ${orderId}`);
+        return null;
+
+    } catch (error) {
+        console.error('Error fetching registration from Google Sheets:', error.message);
+        return null;
+    }
+}
+
+/**
  * Updates registration status in Google Sheets
  * @param {string} orderId - Midtrans order ID
  * @param {string} transactionStatus - Transaction status from Midtrans
@@ -440,7 +492,10 @@ export async function POST(request) {
                 
                 console.log('🎉 Payment successful, calling n8n webhook...');
                 
-                const registrationData = localResult.success ? localResult.registration : null;
+                // Get registration data from Google Sheets
+                const registrationData = await getRegistrationFromGoogleSheets(order_id);
+                console.log('Registration data for n8n:', registrationData ? 'Found' : 'Not found');
+                
                 const n8nResult = await sendPaymentSuccessToN8n(notification, registrationData);
                 console.log('n8n webhook result:', n8nResult);
                 

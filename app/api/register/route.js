@@ -98,7 +98,20 @@ async function createMidtransPaymentLink(registrationData, totalAmount = 180000)
           price: 180000,
           quantity: 1
         }
-      ]
+      ],
+      callbacks: {
+        finish: process.env.PAYMENT_SUCCESS_URL || 'https://werunpalestina.framer.website/',
+        error: process.env.PAYMENT_ERROR_URL || 'https://werunpalestina.framer.website/register?error=payment_failed',
+        pending: process.env.PAYMENT_PENDING_URL || 'https://werunpalestina.framer.website/register?status=pending'
+      },
+      expiry: {
+        duration: 24,
+        unit: "hours"
+      },
+      page_expiry: {
+        duration: 10,
+        unit: "minutes"
+      }
     };
 
     // Add donation item if validTotalAmount > 180000

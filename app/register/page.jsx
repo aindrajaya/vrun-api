@@ -8,16 +8,13 @@ export default function RegisterPage() {
     name: '',
     email: '',
     phone: '',
-    stravaName: ''
+    stravaName: '',
+    donationAmount: ''
   });
 
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [submitStatus, setSubmitStatus] = useState('');
   const [paymentData, setPaymentData] = useState(null);
-  const [showDonation, setShowDonation] = useState(false);
-  const [donationAmount, setDonationAmount] = useState('');
-  const [isSubmittingDonation, setIsSubmittingDonation] = useState(false);
-  const [donationStatus, setDonationStatus] = useState('');
 
   const handleInputChange = (e) => {
     const { name, value } = e.target;
@@ -25,61 +22,6 @@ export default function RegisterPage() {
       ...prev,
       [name]: value
     }));
-  };
-
-  const handleDonationSubmit = async (e) => {
-    e.preventDefault();
-    setIsSubmittingDonation(true);
-    setDonationStatus('');
-
-    try {
-      const donation = parseFloat(donationAmount) || 0;
-      
-      const response = await fetch('/api/register/donation', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          registrationId: paymentData.registrationId,
-          donationAmount: donation
-        }),
-      });
-
-      const result = await response.json();
-
-      if (response.ok) {
-        setDonationStatus('success');
-        // Update payment data with new total
-        setPaymentData(prev => ({
-          ...prev,
-          donationAmount: donation,
-          totalAmount: result.data.totalAmount
-        }));
-        
-        // Auto-redirect to payment after donation
-        setTimeout(() => {
-          if (paymentData?.paymentLink) {
-            window.open(paymentData.paymentLink, '_blank');
-          }
-        }, 2000);
-      } else {
-        setDonationStatus('error');
-        console.error('Donation failed:', result.error);
-      }
-    } catch (error) {
-      setDonationStatus('error');
-      console.error('Donation error:', error);
-    } finally {
-      setIsSubmittingDonation(false);
-    }
-  };
-
-  const handleSkipDonation = () => {
-    setShowDonation(false);
-    if (paymentData?.paymentLink) {
-      window.open(paymentData.paymentLink, '_blank');
-    }
   };
 
   const handleSubmit = async (e) => {
@@ -101,19 +43,14 @@ export default function RegisterPage() {
       if (response.ok) {
         setSubmitStatus('success');
         setPaymentData(result);
-        setFormData({ name: '', email: '', phone: '', stravaName: '' });
+        setFormData({ name: '', email: '', phone: '', stravaName: '', donationAmount: '' });
         
-        // Show donation option after successful registration
+        // Auto-redirect to payment after 2 seconds
         setTimeout(() => {
-          setShowDonation(true);
-        }, 1000);
-        
-        // Auto-redirect to payment after 5 seconds (giving time for donation input)
-        setTimeout(() => {
-          if (result.paymentLink && !showDonation) {
+          if (result.paymentLink) {
             window.open(result.paymentLink, '_blank');
           }
-        }, 5000);
+        }, 2000);
       } else {
         setSubmitStatus('error');
         console.error('Registration failed:', result.error);
@@ -201,7 +138,7 @@ export default function RegisterPage() {
                   </div>
                 </div>
 
-                {submitStatus === 'success' && !showDonation && (
+                {submitStatus === 'success' && (
                   <div className="bg-green-50 border border-green-200 text-green-700 px-4 py-3 rounded-xl text-sm sm:text-base">
                     <div className="font-semibold mb-2">Pendaftaran berhasil! 🎉</div>
                     <div className="mb-2">
@@ -210,75 +147,16 @@ export default function RegisterPage() {
                     <div className="mb-2">
                       Biaya Pendaftaran: <span className="font-semibold">Rp 180.000</span>
                     </div>
-                    <div className="mb-3">
-                      {paymentData?.data?.paymentInstructions}
-                    </div>
-                    <div className="text-xs text-green-600 mb-2">
-                      Menunggu opsi donasi...
-                    </div>
-                  </div>
-                )}
-
-                {showDonation && donationStatus !== 'success' && (
-                  <div className="bg-blue-50 border border-blue-200 text-blue-700 px-4 py-3 rounded-xl text-sm sm:text-base">
-                    <div className="font-semibold mb-3">💝 Tambahkan Donasi (Opsional)</div>
-                    <div className="mb-3 text-sm">
-                      Bantu kami mengumpulkan lebih banyak dana untuk Palestina dengan menambahkan donasi sukarela.
-                    </div>
-                    
-                    <form onSubmit={handleDonationSubmit} className="space-y-3">
-                      <div>
-                        <input
-                          type="number"
-                          placeholder="Jumlah donasi (Rp)"
-                          value={donationAmount}
-                          onChange={(e) => setDonationAmount(e.target.value)}
-                          min="0"
-                          step="1000"
-                          className="w-full px-3 py-2 border border-blue-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none text-sm"
-                        />
-                      </div>
-                      
-                      <div className="flex flex-col sm:flex-row gap-2">
-                        <button
-                          type="submit"
-                          disabled={isSubmittingDonation}
-                          className="flex-1 bg-blue-600 text-white py-2 px-4 rounded-lg font-medium hover:bg-blue-700 disabled:bg-gray-400 disabled:cursor-not-allowed text-sm"
-                        >
-                          {isSubmittingDonation ? 'Memproses...' : 'Tambah Donasi'}
-                        </button>
-                        <button
-                          type="button"
-                          onClick={handleSkipDonation}
-                          className="flex-1 bg-gray-500 text-white py-2 px-4 rounded-lg font-medium hover:bg-gray-600 text-sm"
-                        >
-                          Lewati
-                        </button>
-                      </div>
-                    </form>
-                    
-                    {donationStatus === 'error' && (
-                      <div className="mt-2 text-red-600 text-xs">
-                        Gagal menambahkan donasi. Silakan coba lagi.
+                    {paymentData?.totalAmount > 180000 && (
+                      <div className="mb-2">
+                        Donasi: <span className="font-semibold">Rp {((paymentData?.totalAmount || 180000) - 180000).toLocaleString('id-ID')}</span>
                       </div>
                     )}
-                  </div>
-                )}
-
-                {donationStatus === 'success' && (
-                  <div className="bg-green-50 border border-green-200 text-green-700 px-4 py-3 rounded-xl text-sm sm:text-base">
-                    <div className="font-semibold mb-2">Terima kasih atas donasi Anda! 💚</div>
-                    <div className="mb-2">
-                      ID Pendaftaran: <span className="font-mono">{paymentData?.registrationId}</span>
-                    </div>
-                    <div className="mb-2">
-                      Biaya Pendaftaran: <span className="font-semibold">Rp 180.000</span>
-                    </div>
-                    <div className="mb-2">
-                      Donasi: <span className="font-semibold">Rp {(paymentData?.donationAmount || 0).toLocaleString('id-ID')}</span>
+                    <div className="mb-3">
+                      <span className="font-bold">Total: Rp {(paymentData?.totalAmount || 180000).toLocaleString('id-ID')}</span>
                     </div>
                     <div className="mb-3">
-                      <span className="font-bold">Total: Rp {(180000 + (paymentData?.donationAmount || 0)).toLocaleString('id-ID')}</span>
+                      {paymentData?.data?.paymentInstructions}
                     </div>
                     {paymentData?.paymentLink && (
                       <div className="space-y-2">
@@ -289,7 +167,7 @@ export default function RegisterPage() {
                           onClick={() => window.open(paymentData.paymentLink, '_blank')}
                           className="w-full bg-green-600 text-white py-2 px-4 rounded-lg text-sm font-medium hover:bg-green-700 transition-colors"
                         >
-                          Bayar Sekarang - Rp {(180000 + (paymentData?.donationAmount || 0)).toLocaleString('id-ID')}
+                          Bayar Sekarang - Rp {(paymentData?.totalAmount || 180000).toLocaleString('id-ID')}
                         </button>
                       </div>
                     )}
@@ -349,6 +227,22 @@ export default function RegisterPage() {
                       required
                       className="w-full px-4 sm:px-6 lg:px-8 py-4 sm:py-5 lg:py-6 text-base sm:text-lg lg:text-xl border-2 border-gray-200 rounded-full focus:ring-2 focus:ring-green-500 focus:border-green-500 outline-none transition-all duration-200 text-gray-900 placeholder-gray-500"
                     />
+                  </div>
+
+                  <div className="space-y-2">
+                    <input
+                      type="number"
+                      name="donationAmount"
+                      placeholder="Donasi (Opsional) - Rp"
+                      value={formData.donationAmount}
+                      onChange={handleInputChange}
+                      min="0"
+                      step="1000"
+                      className="w-full px-4 sm:px-6 lg:px-8 py-4 sm:py-5 lg:py-6 text-base sm:text-lg lg:text-xl border-2 border-gray-200 rounded-full focus:ring-2 focus:ring-green-500 focus:border-green-500 outline-none transition-all duration-200 text-gray-900 placeholder-gray-500"
+                    />
+                    <p className="text-xs sm:text-sm text-gray-500 px-4">
+                      Donasi bersifat sukarela untuk mendukung Palestina. Kosongkan jika tidak ingin berdonasi.
+                    </p>
                   </div>
 
                   <div className="pt-4">

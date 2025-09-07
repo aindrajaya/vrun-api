@@ -141,27 +141,78 @@ async function getRegistrationFromGoogleSheets(orderId) {
             const row = rows[i];
             const rowOrderId = row[16]; // Column Q (0-indexed = 16) - midtransOrderId
             
-            if (rowOrderId === orderId) {
-                console.log(`Found registration at row ${i + 1}:`, row);
+            if (rowOrderId) {
+                // First try exact match
+                if (rowOrderId === orderId) {
+                    console.log(`Found exact match at row ${i + 1}:`, row);
+                    
+                    return {
+                        id: row[1] || '', // Column B - Registration ID
+                        name: row[2] || '', // Column C - Name
+                        email: row[3] || '', // Column D - Email  
+                        phone: row[4] || '', // Column E - Phone
+                        stravaName: row[5] || '', // Column F - Strava Name
+                        packageType: row[6] || 'starter', // Column G - Package Type
+                        baseAmount: parseFloat(row[7]) || 80000, // Column H - Base Amount
+                        fixedDonation: parseFloat(row[8]) || 20000, // Column I - Fixed Donation
+                        additionalDonation: parseFloat(row[9]) || 0, // Column J - Additional Donation
+                        registrationDate: row[10] || '', // Column K - Registration Date
+                        status: row[11] || 'pending', // Column L - Status
+                        paymentStatus: row[12] || 'pending', // Column M - Payment Status
+                        totalAmount: parseFloat(row[13]) || 100000, // Column N - Total Amount
+                        donationDate: row[14] || '', // Column O - Donation Date
+                        paymentLink: row[15] || '', // Column P - Payment Link
+                        orderId: row[16] || '' // Column Q - Midtrans Order ID
+                    };
+                }
                 
-                return {
-                    id: row[1] || '', // Column B - Registration ID
-                    name: row[2] || '', // Column C - Name
-                    email: row[3] || '', // Column D - Email  
-                    phone: row[4] || '', // Column E - Phone
-                    stravaName: row[5] || '', // Column F - Strava Name
-                    packageType: row[6] || 'starter', // Column G - Package Type
-                    baseAmount: parseFloat(row[7]) || 80000, // Column H - Base Amount
-                    fixedDonation: parseFloat(row[8]) || 20000, // Column I - Fixed Donation
-                    additionalDonation: parseFloat(row[9]) || 0, // Column J - Additional Donation
-                    registrationDate: row[10] || '', // Column K - Registration Date
-                    status: row[11] || 'pending', // Column L - Status
-                    paymentStatus: row[12] || 'pending', // Column M - Payment Status
-                    totalAmount: parseFloat(row[13]) || 100000, // Column N - Total Amount
-                    donationDate: row[14] || '', // Column O - Donation Date
-                    paymentLink: row[15] || '', // Column P - Payment Link
-                    orderId: row[16] || '' // Column Q - Midtrans Order ID
-                };
+                // Then try partial match - check if the received order ID starts with the stored order ID
+                if (orderId.startsWith(rowOrderId)) {
+                    console.log(`Found partial match at row ${i + 1}: stored="${rowOrderId}", received="${orderId}"`);
+                    
+                    return {
+                        id: row[1] || '', // Column B - Registration ID
+                        name: row[2] || '', // Column C - Name
+                        email: row[3] || '', // Column D - Email  
+                        phone: row[4] || '', // Column E - Phone
+                        stravaName: row[5] || '', // Column F - Strava Name
+                        packageType: row[6] || 'starter', // Column G - Package Type
+                        baseAmount: parseFloat(row[7]) || 80000, // Column H - Base Amount
+                        fixedDonation: parseFloat(row[8]) || 20000, // Column I - Fixed Donation
+                        additionalDonation: parseFloat(row[9]) || 0, // Column J - Additional Donation
+                        registrationDate: row[10] || '', // Column K - Registration Date
+                        status: row[11] || 'pending', // Column L - Status
+                        paymentStatus: row[12] || 'pending', // Column M - Payment Status
+                        totalAmount: parseFloat(row[13]) || 100000, // Column N - Total Amount
+                        donationDate: row[14] || '', // Column O - Donation Date
+                        paymentLink: row[15] || '', // Column P - Payment Link
+                        orderId: row[16] || '' // Column Q - Midtrans Order ID
+                    };
+                }
+                
+                // Also try reverse match - check if stored order ID starts with received order ID
+                if (rowOrderId.startsWith(orderId)) {
+                    console.log(`Found reverse match at row ${i + 1}: stored="${rowOrderId}", received="${orderId}"`);
+                    
+                    return {
+                        id: row[1] || '', // Column B - Registration ID
+                        name: row[2] || '', // Column C - Name
+                        email: row[3] || '', // Column D - Email  
+                        phone: row[4] || '', // Column E - Phone
+                        stravaName: row[5] || '', // Column F - Strava Name
+                        packageType: row[6] || 'starter', // Column G - Package Type
+                        baseAmount: parseFloat(row[7]) || 80000, // Column H - Base Amount
+                        fixedDonation: parseFloat(row[8]) || 20000, // Column I - Fixed Donation
+                        additionalDonation: parseFloat(row[9]) || 0, // Column J - Additional Donation
+                        registrationDate: row[10] || '', // Column K - Registration Date
+                        status: row[11] || 'pending', // Column L - Status
+                        paymentStatus: row[12] || 'pending', // Column M - Payment Status
+                        totalAmount: parseFloat(row[13]) || 100000, // Column N - Total Amount
+                        donationDate: row[14] || '', // Column O - Donation Date
+                        paymentLink: row[15] || '', // Column P - Payment Link
+                        orderId: row[16] || '' // Column Q - Midtrans Order ID
+                    };
+                }
             }
         }
 
@@ -215,12 +266,21 @@ async function updateRegistrationInGoogleSheets(orderId, transactionStatus, paym
                     break;
                 }
                 
-                // Then try partial match - check if the stored order ID is a prefix of the received order ID
+                // Then try partial match - check if the received order ID starts with the stored order ID
                 // This handles cases where Midtrans appends additional timestamps
                 if (orderId.startsWith(midtransOrderId)) {
                     targetRowIndex = i + 1;
                     foundOrderId = midtransOrderId;
                     console.log(`Found partial match: stored="${midtransOrderId}", received="${orderId}"`);
+                    break;
+                }
+                
+                // Also try reverse match - check if stored order ID starts with received order ID
+                // This handles cases where the stored ID might have been truncated
+                if (midtransOrderId.startsWith(orderId)) {
+                    targetRowIndex = i + 1;
+                    foundOrderId = midtransOrderId;
+                    console.log(`Found reverse match: stored="${midtransOrderId}", received="${orderId}"`);
                     break;
                 }
             }
@@ -333,11 +393,19 @@ async function updateLocalRegistration(orderId, transactionStatus, paymentType) 
                     break;
                 }
                 
-                // Then try partial match - check if the stored order ID is a prefix of the received order ID
+                // Then try partial match - check if the received order ID starts with the stored order ID
                 if (orderId.startsWith(reg.midtransOrderId)) {
                     registrationIndex = i;
                     foundOrderId = reg.midtransOrderId;
                     console.log(`Found partial match in local: stored="${reg.midtransOrderId}", received="${orderId}"`);
+                    break;
+                }
+                
+                // Also try reverse match - check if stored order ID starts with received order ID
+                if (reg.midtransOrderId.startsWith(orderId)) {
+                    registrationIndex = i;
+                    foundOrderId = reg.midtransOrderId;
+                    console.log(`Found reverse match in local: stored="${reg.midtransOrderId}", received="${orderId}"`);
                     break;
                 }
             }
@@ -472,7 +540,9 @@ export async function POST(request) {
             transaction_status,
             fraud_status,
             payment_type,
-            gross_amount
+            gross_amount,
+            orderIdLength: order_id ? order_id.length : 0,
+            orderIdPattern: order_id ? order_id.split('-') : []
         });
 
         // Handle different transaction statuses

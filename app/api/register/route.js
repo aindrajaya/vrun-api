@@ -49,13 +49,14 @@ async function createMidtransPaymentLink(registrationData, totalAmount = 180000)
     // Split name into first and last name
     const nameParts = registrationData.name.trim().split(' ');
     const firstName = nameParts[0] || 'Customer';
-    const lastName = nameParts.slice(1).join(' ') || '';
+    // If only single name provided, duplicate it for last name to comply with Midtrans API
+    const lastName = nameParts.slice(1).join(' ') || firstName;
 
     // Validate required fields for Midtrans
     if (!registrationData.email || !registrationData.phone || !registrationData.name) {
       console.error('Missing required fields for Midtrans payment link');
       return {
-        paymentUrl: process.env.MIDTRANS_PAYMENT_LINK || 'https://app.sandbox.midtrans.com/payment-links/ydsf-run',
+        paymentUrl: process.env.MIDTRANS_PAYMENT_LINK || 'https://app.midtrans.com/payment-links/ydsf-run',
         orderId: null
       };
     }
@@ -69,14 +70,30 @@ async function createMidtransPaymentLink(registrationData, totalAmount = 180000)
     }
 
     // Calculate package amounts
-    const packageType = registrationData.packageType || 'starter';
-    const baseAmount = packageType === 'trial' ? 10000 : (packageType === 'starter' ? 80000 : 135000);
-    const fixedDonation = packageType === 'trial' ? 0 : 20000;
+    const packageType = registrationData.packageType || 'basic';
+    let baseAmount = 0;
+    let fixedDonation = 0;
+    let jerseyPrice = 0;
+    
+    if (packageType === 'basic') {
+      baseAmount = 80000;
+      fixedDonation = 20000;
+      jerseyPrice = 0;
+    } else if (packageType === 'basic-jersey') {
+      baseAmount = 80000;
+      fixedDonation = 20000;
+      jerseyPrice = 150000;
+    } else if (packageType === 'jersey-only') {
+      baseAmount = 0;
+      fixedDonation = 0;
+      jerseyPrice = 150000;
+    }
+    
     const additionalDonation = registrationData.additionalDonation || 0;
     
     // Calculate the actual total amount including additional donation
-    const actualTotalAmount = baseAmount + fixedDonation + additionalDonation;
-    const packageTotal = baseAmount + fixedDonation;
+    const actualTotalAmount = baseAmount + fixedDonation + jerseyPrice + additionalDonation;
+    const packageTotal = baseAmount + fixedDonation + jerseyPrice;
     
     // Use the actual calculated total, but ensure it's at least the package minimum
     const validTotalAmount = Math.max(actualTotalAmount, packageTotal);
@@ -85,6 +102,7 @@ async function createMidtransPaymentLink(registrationData, totalAmount = 180000)
       packageType: packageType,
       baseAmount: baseAmount,
       fixedDonation: fixedDonation,
+      jerseyPrice: jerseyPrice,
       packageTotal: packageTotal,
       additionalDonation: additionalDonation,
       actualTotalAmount: actualTotalAmount,
@@ -96,20 +114,37 @@ async function createMidtransPaymentLink(registrationData, totalAmount = 180000)
     });
 
     // Build item_details array first
-    const itemDetails = [
-      {
+    const itemDetails = [];
+    
+    // Add base amount if applicable
+    if (baseAmount > 0) {
+      itemDetails.push({
         id: "wrp-base-amount",
         name: `WRP - Biaya Tetap Paket ${packageType.charAt(0).toUpperCase() + packageType.slice(1)}`,
         price: baseAmount,
         quantity: 1
-      },
-      {
+      });
+    }
+    
+    // Add fixed donation if applicable
+    if (fixedDonation > 0) {
+      itemDetails.push({
         id: "wrp-fixed-donation",
         name: "Donasi Tetap untuk Palestina",
         price: fixedDonation,
         quantity: 1
-      }
-    ];
+      });
+    }
+    
+    // Add jersey price if applicable
+    if (jerseyPrice > 0) {
+      itemDetails.push({
+        id: "wrp-jersey",
+        name: "Jersey WRP",
+        price: jerseyPrice,
+        quantity: 1
+      });
+    }
 
     // Add additional donation item if there's any additional donation
     if (additionalDonation > 0) {
@@ -129,6 +164,7 @@ async function createMidtransPaymentLink(registrationData, totalAmount = 180000)
     console.log('Payment calculation verification:', {
       baseAmount: baseAmount,
       fixedDonation: fixedDonation,
+      jerseyPrice: jerseyPrice,
       additionalDonation: additionalDonation,
       calculatedTotalFromItems: calculatedGrossAmount,
       shouldMatchCalculatedTotal: actualTotalAmount,
@@ -153,7 +189,7 @@ async function createMidtransPaymentLink(registrationData, totalAmount = 180000)
       },
       item_details: itemDetails,
       callbacks: {
-        finish: process.env.PAYMENT_SUCCESS_URL || `${process.env.NEXT_PUBLIC_BASE_URL || 'http://localhost:3000'}/success`,
+        finish: process.env.PAYMENT_SUCCESS_URL || `${process.env.NEXT_PUBLIC_BASE_URL || 'https://register.werunpalestina.id'}/success`,
         error: process.env.PAYMENT_ERROR_URL || 'https://werunpalestina.framer.website/register?error=payment_failed',
         pending: process.env.PAYMENT_PENDING_URL || 'https://werunpalestina.framer.website/register?status=pending'
       },
@@ -323,8 +359,10 @@ async function storeRegistrationInGoogleSheets(registrationData) {
             'phone',
             'stravaName',
             'packageType',
+            'jerseySize',
             'baseAmount',
             'fixedDonation',
+            'jerseyPrice',
             'additionalDonation',
             'registrationDate',
             'status',
@@ -341,19 +379,51 @@ async function storeRegistrationInGoogleSheets(registrationData) {
                 return new Date().toISOString(); // Add current timestamp
             }
             if(key === 'totalAmount') {
-                const packageType = registrationData.packageType || 'starter';
-                const baseAmount = packageType === 'trial' ? 10000 : (packageType === 'starter' ? 80000 : 135000);
-                const fixedDonation = packageType === 'trial' ? 0 : 20000;
+                const packageType = registrationData.packageType || 'basic';
+                let baseAmount = 0;
+                let fixedDonation = 0;
+                let jerseyPrice = 0;
+                
+                if (packageType === 'basic') {
+                  baseAmount = 80000;
+                  fixedDonation = 20000;
+                  jerseyPrice = 0;
+                } else if (packageType === 'basic-jersey') {
+                  baseAmount = 80000;
+                  fixedDonation = 20000;
+                  jerseyPrice = 150000;
+                } else if (packageType === 'jersey-only') {
+                  baseAmount = 0;
+                  fixedDonation = 0;
+                  jerseyPrice = 150000;
+                }
+                
                 const additionalDonation = registrationData.additionalDonation || 0;
-                return baseAmount + fixedDonation + additionalDonation;
+                return baseAmount + fixedDonation + jerseyPrice + additionalDonation;
             }
             if(key === 'baseAmount') {
-                const packageType = registrationData.packageType || 'starter';
-                return packageType === 'trial' ? 10000 : (packageType === 'starter' ? 80000 : 135000);
+                const packageType = registrationData.packageType || 'basic';
+                if (packageType === 'basic' || packageType === 'basic-jersey') {
+                  return 80000;
+                } else {
+                  return 0;
+                }
             }
             if(key === 'fixedDonation') {
-                const packageType = registrationData.packageType || 'starter';
-                return packageType === 'trial' ? 0 : 20000;
+                const packageType = registrationData.packageType || 'basic';
+                if (packageType === 'basic' || packageType === 'basic-jersey') {
+                  return 20000;
+                } else {
+                  return 0;
+                }
+            }
+            if(key === 'jerseyPrice') {
+                const packageType = registrationData.packageType || 'basic';
+                if (packageType === 'basic-jersey' || packageType === 'jersey-only') {
+                  return 150000;
+                } else {
+                  return 0;
+                }
             }
             return registrationData[key] !== undefined ? registrationData[key] : '';
         })];
@@ -365,7 +435,7 @@ async function storeRegistrationInGoogleSheets(registrationData) {
         try {
             const response = await sheets.spreadsheets.values.get({
                 spreadsheetId: SPREADSHEET_ID,
-                range: `${SHEET_NAME}!A1:Q1`,
+                range: `${SHEET_NAME}!A1:S1`,
             });
 
             // If sheet is empty, add headers
@@ -379,8 +449,10 @@ async function storeRegistrationInGoogleSheets(registrationData) {
                     'Phone',
                     'Strava Name',
                     'Package Type',
+                    'Jersey Size',
                     'Base Amount',
                     'Fixed Donation',
+                    'Jersey Price',
                     'Additional Donation',
                     'Registration Date',
                     'Status',
@@ -393,7 +465,7 @@ async function storeRegistrationInGoogleSheets(registrationData) {
 
                 await sheets.spreadsheets.values.update({
                     spreadsheetId: SPREADSHEET_ID,
-                    range: `${SHEET_NAME}!A1:Q1`,
+                    range: `${SHEET_NAME}!A1:S1`,
                     valueInputOption: 'USER_ENTERED',
                     resource: {
                         values: [headers],
@@ -464,13 +536,22 @@ export async function POST(request) {
     const body = await request.json();
     console.log('Request body received:', body);
     
-    const { name, email, phone, stravaName, packageType, donationAmount } = body;
+    const { name, email, phone, stravaName, packageType, donationAmount, jerseySize } = body;
 
     // Validate required fields
     if (!name || !email || !phone || !stravaName || !packageType) {
       console.log('Validation failed: missing required fields');
       return NextResponse.json(
         { error: 'All fields are required' },
+        { status: 400 }
+      );
+    }
+
+    // Validate jersey size for packages that require it
+    if ((packageType === 'basic-jersey' || packageType === 'jersey-only') && !jerseySize) {
+      console.log('Validation failed: jersey size required for selected package');
+      return NextResponse.json(
+        { error: 'Jersey size is required for selected package' },
         { status: 400 }
       );
     }
@@ -488,11 +569,27 @@ export async function POST(request) {
     console.log('Validation passed, creating registration object...');
 
     // Calculate package amounts
-    const packageTypeValue = packageType || 'starter';
-    const baseAmount = packageTypeValue === 'trial' ? 10000 : (packageTypeValue === 'starter' ? 80000 : 135000);
-    const fixedDonation = packageTypeValue === 'trial' ? 0 : 20000;
+    const packageTypeValue = packageType || 'basic';
+    let baseAmount = 0;
+    let fixedDonation = 0;
+    let jerseyPrice = 0;
+    
+    if (packageTypeValue === 'basic') {
+      baseAmount = 80000;
+      fixedDonation = 20000;
+      jerseyPrice = 0;
+    } else if (packageTypeValue === 'basic-jersey') {
+      baseAmount = 80000;
+      fixedDonation = 20000;
+      jerseyPrice = 150000;
+    } else if (packageTypeValue === 'jersey-only') {
+      baseAmount = 0;
+      fixedDonation = 0;
+      jerseyPrice = 150000;
+    }
+    
     const additionalDonation = parseFloat(donationAmount) || 0;
-    const packageTotal = baseAmount + fixedDonation; // This is the package price (100000 or 155000)
+    const packageTotal = baseAmount + fixedDonation + jerseyPrice; // This is the package price
     const totalAmount = packageTotal + additionalDonation;
     
     console.log('Registration details:', {
@@ -501,6 +598,7 @@ export async function POST(request) {
       packageType: packageTypeValue,
       baseAmount: baseAmount,
       fixedDonation: fixedDonation,
+      jerseyPrice: jerseyPrice,
       packageTotal: packageTotal,
       additionalDonation: additionalDonation,
       totalAmount: totalAmount
@@ -514,8 +612,10 @@ export async function POST(request) {
       phone: phone.trim(),
       stravaName: stravaName.trim(),
       packageType: packageTypeValue,
+      jerseySize: jerseySize || '',
       baseAmount: baseAmount,
       fixedDonation: fixedDonation,
+      jerseyPrice: jerseyPrice,
       additionalDonation: additionalDonation,
       registrationDate: new Date().toISOString(),
       status: 'pending',
@@ -532,7 +632,7 @@ export async function POST(request) {
       if (isDuplicate) {
         console.log('Duplicate email found in Google Sheets, returning error');
         return NextResponse.json(
-          { error: 'Email already registered' },
+          { error: 'Email anda telah terdaftar, silahkan cek kotak masuk email anda untuk konfirmasi pembayaran' },
           { status: 409 }
         );
       }
@@ -575,6 +675,7 @@ export async function POST(request) {
       packageType: packageTypeValue,
       baseAmount: baseAmount,
       fixedDonation: fixedDonation,
+      jerseyPrice: jerseyPrice,
       additionalDonation: additionalDonation,
       totalAmount: totalAmount,
       data: {
@@ -584,11 +685,12 @@ export async function POST(request) {
         packageType: packageTypeValue,
         baseAmount: baseAmount,
         fixedDonation: fixedDonation,
+        jerseyPrice: jerseyPrice,
         additionalDonation: additionalDonation,
         totalAmount: totalAmount,
         paymentInstructions: additionalDonation > 0 
           ? `Silakan lanjutkan ke link pembayaran untuk menyelesaikan pendaftaran Anda (Rp ${totalAmount.toLocaleString('id-ID')} termasuk donasi tambahan).`
-          : `Silakan lanjutkan ke link pembayaran untuk menyelesaikan pendaftaran Anda (Rp ${totalAmount.toLocaleString('id-ID')} sudah termasuk donasi tetap Rp 20.000).`
+          : `Silakan lanjutkan ke link pembayaran untuk menyelesaikan pendaftaran Anda (Rp ${totalAmount.toLocaleString('id-ID')}).`
       }
     });
 
@@ -613,7 +715,7 @@ export async function GET(request) {
     const sheets = await getGoogleSheetsClient();
     const response = await sheets.spreadsheets.values.get({
       spreadsheetId: SPREADSHEET_ID,
-      range: `${SHEET_NAME}!A2:Q1000`, // Skip header row, get up to 1000 rows (now up to column Q)
+      range: `${SHEET_NAME}!A2:S1000`, // Skip header row, get up to 1000 rows (now up to column S)
     });
 
     const rows = response.data.values || [];
@@ -627,17 +729,19 @@ export async function GET(request) {
       email: row[3] || '',
       phone: row[4] || '',
       stravaName: row[5] || '',
-      packageType: row[6] || 'starter',
-      baseAmount: parseFloat(row[7]) || 80000,
-      fixedDonation: parseFloat(row[8]) || 20000,
-      additionalDonation: parseFloat(row[9]) || 0,
-      registrationDate: row[10] || '',
-      status: row[11] || 'pending',
-      paymentStatus: row[12] || 'unpaid',
-      totalAmount: parseFloat(row[13]) || 100000,
-      donationDate: row[11] || null,
-      paymentLink: row[12] || '',
-      midtransOrderId: row[13] || ''
+      packageType: row[6] || 'basic',
+      jerseySize: row[7] || '',
+      baseAmount: parseFloat(row[8]) || 0,
+      fixedDonation: parseFloat(row[9]) || 0,
+      jerseyPrice: parseFloat(row[10]) || 0,
+      additionalDonation: parseFloat(row[11]) || 0,
+      registrationDate: row[12] || '',
+      status: row[13] || 'pending',
+      paymentStatus: row[14] || 'unpaid',
+      totalAmount: parseFloat(row[15]) || 100000,
+      donationDate: row[16] || null,
+      paymentLink: row[17] || '',
+      midtransOrderId: row[18] || ''
     })).filter(reg => reg.id); // Filter out empty rows
 
     // Return summary without sensitive data

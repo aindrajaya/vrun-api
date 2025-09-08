@@ -41,9 +41,11 @@ async function sendPaymentSuccessToN8n(paymentData, registrationData = null) {
                 email: registrationData.email,
                 phone: registrationData.phone,
                 stravaName: registrationData.stravaName,
-                packageType: registrationData.packageType || 'starter',
+                packageType: registrationData.packageType || 'basic',
+                jerseySize: registrationData.jerseySize || '',
                 baseAmount: registrationData.baseAmount || 80000,
                 fixedDonation: registrationData.fixedDonation || 20000,
+                jerseyPrice: registrationData.jerseyPrice || 0,
                 additionalDonation: registrationData.additionalDonation || 0,
                 totalAmount: registrationData.totalAmount || parseInt(paymentData.gross_amount),
                 registrationDate: registrationData.registrationDate
@@ -130,16 +132,16 @@ async function getRegistrationFromGoogleSheets(orderId) {
         // Get all registration data
         const response = await sheets.spreadsheets.values.get({
             spreadsheetId: SPREADSHEET_ID,
-            range: `${SHEET_NAME}!A:Q`, // Get all columns including midtransOrderId in column Q
+            range: `${SHEET_NAME}!A:S`, // Get all columns including midtransOrderId in column S
         });
 
         const rows = response.data.values || [];
         console.log(`Searching for order ID: ${orderId} in ${rows.length} rows`);
 
-        // Find registration by midtransOrderId (should be in column Q, index 16)
+        // Find registration by midtransOrderId (should be in column S, index 18)
         for (let i = 1; i < rows.length; i++) { // Skip header row
             const row = rows[i];
-            const rowOrderId = row[16]; // Column Q (0-indexed = 16) - midtransOrderId
+            const rowOrderId = row[18]; // Column S (0-indexed = 18) - midtransOrderId
             
             if (rowOrderId) {
                 // First try exact match
@@ -152,17 +154,19 @@ async function getRegistrationFromGoogleSheets(orderId) {
                         email: row[3] || '', // Column D - Email  
                         phone: row[4] || '', // Column E - Phone
                         stravaName: row[5] || '', // Column F - Strava Name
-                        packageType: row[6] || 'starter', // Column G - Package Type
-                        baseAmount: parseFloat(row[7]) || 80000, // Column H - Base Amount
-                        fixedDonation: parseFloat(row[8]) || 20000, // Column I - Fixed Donation
-                        additionalDonation: parseFloat(row[9]) || 0, // Column J - Additional Donation
-                        registrationDate: row[10] || '', // Column K - Registration Date
-                        status: row[11] || 'pending', // Column L - Status
-                        paymentStatus: row[12] || 'pending', // Column M - Payment Status
-                        totalAmount: parseFloat(row[13]) || 100000, // Column N - Total Amount
-                        donationDate: row[14] || '', // Column O - Donation Date
-                        paymentLink: row[15] || '', // Column P - Payment Link
-                        orderId: row[16] || '' // Column Q - Midtrans Order ID
+                        packageType: row[6] || 'basic', // Column G - Package Type
+                        jerseySize: row[7] || '', // Column H - Jersey Size
+                        baseAmount: parseFloat(row[8]) || 80000, // Column I - Base Amount
+                        fixedDonation: parseFloat(row[9]) || 20000, // Column J - Fixed Donation
+                        jerseyPrice: parseFloat(row[10]) || 0, // Column K - Jersey Price
+                        additionalDonation: parseFloat(row[11]) || 0, // Column L - Additional Donation
+                        registrationDate: row[12] || '', // Column M - Registration Date
+                        status: row[13] || 'pending', // Column N - Status
+                        paymentStatus: row[14] || 'pending', // Column O - Payment Status
+                        totalAmount: parseFloat(row[15]) || 100000, // Column P - Total Amount
+                        donationDate: row[16] || '', // Column Q - Donation Date
+                        paymentLink: row[17] || '', // Column R - Payment Link
+                        orderId: row[18] || '' // Column S - Midtrans Order ID
                     };
                 }
                 
@@ -176,17 +180,19 @@ async function getRegistrationFromGoogleSheets(orderId) {
                         email: row[3] || '', // Column D - Email  
                         phone: row[4] || '', // Column E - Phone
                         stravaName: row[5] || '', // Column F - Strava Name
-                        packageType: row[6] || 'starter', // Column G - Package Type
-                        baseAmount: parseFloat(row[7]) || 80000, // Column H - Base Amount
-                        fixedDonation: parseFloat(row[8]) || 20000, // Column I - Fixed Donation
-                        additionalDonation: parseFloat(row[9]) || 0, // Column J - Additional Donation
-                        registrationDate: row[10] || '', // Column K - Registration Date
-                        status: row[11] || 'pending', // Column L - Status
-                        paymentStatus: row[12] || 'pending', // Column M - Payment Status
-                        totalAmount: parseFloat(row[13]) || 100000, // Column N - Total Amount
-                        donationDate: row[14] || '', // Column O - Donation Date
-                        paymentLink: row[15] || '', // Column P - Payment Link
-                        orderId: row[16] || '' // Column Q - Midtrans Order ID
+                        packageType: row[6] || 'basic', // Column G - Package Type
+                        jerseySize: row[7] || '', // Column H - Jersey Size
+                        baseAmount: parseFloat(row[8]) || 80000, // Column I - Base Amount
+                        fixedDonation: parseFloat(row[9]) || 20000, // Column J - Fixed Donation
+                        jerseyPrice: parseFloat(row[10]) || 0, // Column K - Jersey Price
+                        additionalDonation: parseFloat(row[11]) || 0, // Column L - Additional Donation
+                        registrationDate: row[12] || '', // Column M - Registration Date
+                        status: row[13] || 'pending', // Column N - Status
+                        paymentStatus: row[14] || 'pending', // Column O - Payment Status
+                        totalAmount: parseFloat(row[15]) || 100000, // Column P - Total Amount
+                        donationDate: row[16] || '', // Column Q - Donation Date
+                        paymentLink: row[17] || '', // Column R - Payment Link
+                        orderId: row[18] || '' // Column S - Midtrans Order ID
                     };
                 }
                 
@@ -200,17 +206,19 @@ async function getRegistrationFromGoogleSheets(orderId) {
                         email: row[3] || '', // Column D - Email  
                         phone: row[4] || '', // Column E - Phone
                         stravaName: row[5] || '', // Column F - Strava Name
-                        packageType: row[6] || 'starter', // Column G - Package Type
-                        baseAmount: parseFloat(row[7]) || 80000, // Column H - Base Amount
-                        fixedDonation: parseFloat(row[8]) || 20000, // Column I - Fixed Donation
-                        additionalDonation: parseFloat(row[9]) || 0, // Column J - Additional Donation
-                        registrationDate: row[10] || '', // Column K - Registration Date
-                        status: row[11] || 'pending', // Column L - Status
-                        paymentStatus: row[12] || 'pending', // Column M - Payment Status
-                        totalAmount: parseFloat(row[13]) || 100000, // Column N - Total Amount
-                        donationDate: row[14] || '', // Column O - Donation Date
-                        paymentLink: row[15] || '', // Column P - Payment Link
-                        orderId: row[16] || '' // Column Q - Midtrans Order ID
+                        packageType: row[6] || 'basic', // Column G - Package Type
+                        jerseySize: row[7] || '', // Column H - Jersey Size
+                        baseAmount: parseFloat(row[8]) || 80000, // Column I - Base Amount
+                        fixedDonation: parseFloat(row[9]) || 20000, // Column J - Fixed Donation
+                        jerseyPrice: parseFloat(row[10]) || 0, // Column K - Jersey Price
+                        additionalDonation: parseFloat(row[11]) || 0, // Column L - Additional Donation
+                        registrationDate: row[12] || '', // Column M - Registration Date
+                        status: row[13] || 'pending', // Column N - Status
+                        paymentStatus: row[14] || 'pending', // Column O - Payment Status
+                        totalAmount: parseFloat(row[15]) || 100000, // Column P - Total Amount
+                        donationDate: row[16] || '', // Column Q - Donation Date
+                        paymentLink: row[17] || '', // Column R - Payment Link
+                        orderId: row[18] || '' // Column S - Midtrans Order ID
                     };
                 }
             }
@@ -241,7 +249,7 @@ async function updateRegistrationInGoogleSheets(orderId, transactionStatus, paym
         // Get all data to find the row with matching order ID
         const response = await sheets.spreadsheets.values.get({
             spreadsheetId: SPREADSHEET_ID,
-            range: `${SHEET_NAME}!A:Q`, // Get all columns (now Q columns)
+            range: `${SHEET_NAME}!A:S`, // Get all columns (now S columns)
         });
 
         const rows = response.data.values || [];
@@ -250,19 +258,24 @@ async function updateRegistrationInGoogleSheets(orderId, transactionStatus, paym
             return { success: false, message: 'No data found in sheet' };
         }
 
-        // Find the row with matching Midtrans Order ID (column Q, index 16)
+        // Find the row with matching Midtrans Order ID (column S, index 18)
         // Handle both exact matches and partial matches (in case Midtrans appends timestamps)
         let targetRowIndex = -1;
         let foundOrderId = null;
         
+        console.log(`Searching for order ID: "${orderId}" in ${rows.length - 1} rows`);
+        
         for (let i = 1; i < rows.length; i++) { // Skip header row
-            const midtransOrderId = rows[i][16]; // Column Q (index 16) - Midtrans Order ID
+            const midtransOrderId = rows[i][18]; // Column S (index 18) - Midtrans Order ID
             
             if (midtransOrderId) {
+                console.log(`Row ${i}: Comparing stored="${midtransOrderId}" with received="${orderId}"`);
+                
                 // First try exact match
                 if (midtransOrderId === orderId) {
                     targetRowIndex = i + 1; // Google Sheets is 1-indexed
                     foundOrderId = midtransOrderId;
+                    console.log(`✅ Found exact match at row ${targetRowIndex}`);
                     break;
                 }
                 
@@ -271,7 +284,7 @@ async function updateRegistrationInGoogleSheets(orderId, transactionStatus, paym
                 if (orderId.startsWith(midtransOrderId)) {
                     targetRowIndex = i + 1;
                     foundOrderId = midtransOrderId;
-                    console.log(`Found partial match: stored="${midtransOrderId}", received="${orderId}"`);
+                    console.log(`✅ Found partial match (received starts with stored) at row ${targetRowIndex}: stored="${midtransOrderId}", received="${orderId}"`);
                     break;
                 }
                 
@@ -280,14 +293,39 @@ async function updateRegistrationInGoogleSheets(orderId, transactionStatus, paym
                 if (midtransOrderId.startsWith(orderId)) {
                     targetRowIndex = i + 1;
                     foundOrderId = midtransOrderId;
-                    console.log(`Found reverse match: stored="${midtransOrderId}", received="${orderId}"`);
+                    console.log(`✅ Found reverse match (stored starts with received) at row ${targetRowIndex}: stored="${midtransOrderId}", received="${orderId}"`);
                     break;
+                }
+                
+                // Additional check: if both IDs contain similar patterns, try substring matching
+                // Extract the base pattern (e.g., "WRP-1757304284049-1757304284813" from longer IDs)
+                const receivedParts = orderId.split('-');
+                const storedParts = midtransOrderId.split('-');
+                
+                if (receivedParts.length >= 3 && storedParts.length >= 3) {
+                    // Compare first 3 parts: WRP-timestamp1-timestamp2
+                    const receivedBase = receivedParts.slice(0, 3).join('-');
+                    const storedBase = storedParts.slice(0, 3).join('-');
+                    
+                    if (receivedBase === storedBase) {
+                        targetRowIndex = i + 1;
+                        foundOrderId = midtransOrderId;
+                        console.log(`✅ Found base pattern match at row ${targetRowIndex}: receivedBase="${receivedBase}", storedBase="${storedBase}"`);
+                        break;
+                    }
                 }
             }
         }
 
         if (targetRowIndex === -1) {
-            console.log('Order ID not found in sheet:', orderId);
+            console.log('❌ Order ID not found in sheet:', orderId);
+            console.log('Available order IDs in sheet:');
+            for (let i = 1; i < Math.min(rows.length, 10); i++) { // Show first 10 for debugging
+                const midtransOrderId = rows[i][18]; // Column S (index 18) - Midtrans Order ID
+                if (midtransOrderId) {
+                    console.log(`  Row ${i + 1}: "${midtransOrderId}"`);
+                }
+            }
             return { success: false, message: 'Order ID not found in sheet' };
         }
 
@@ -319,14 +357,14 @@ async function updateRegistrationInGoogleSheets(orderId, transactionStatus, paym
 
         console.log(`Updating row ${targetRowIndex}: status=${newStatus}, paymentStatus=${newPaymentStatus}`);
 
-        // Update status (column L) and payment status (column M)
+        // Update status (column N) and payment status (column O)
         const updates = [
             {
-                range: `${SHEET_NAME}!L${targetRowIndex}`, // Status column
+                range: `${SHEET_NAME}!N${targetRowIndex}`, // Status column
                 values: [[newStatus]]
             },
             {
-                range: `${SHEET_NAME}!M${targetRowIndex}`, // Payment Status column
+                range: `${SHEET_NAME}!O${targetRowIndex}`, // Payment Status column
                 values: [[newPaymentStatus]]
             }
         ];

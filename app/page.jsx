@@ -10,12 +10,14 @@ export default function RegisterPage() {
     email: '',
     phone: '',
     stravaName: '',
-    packageType: 'starter',
-    donationAmount: ''
+    packageType: 'basic',
+    donationAmount: '',
+    jerseySize: ''
   });
 
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [submitStatus, setSubmitStatus] = useState('');
+  const [errorMessage, setErrorMessage] = useState('');
   const [paymentData, setPaymentData] = useState(null);
   const [redirectCountdown, setRedirectCountdown] = useState(null);
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
@@ -46,29 +48,31 @@ export default function RegisterPage() {
   const handlePackageSelect = (packageType) => {
     setFormData(prev => ({
       ...prev,
-      packageType: packageType
+      packageType: packageType,
+      // Reset jersey size if switching to basic package
+      jerseySize: packageType === 'basic' ? '' : prev.jerseySize
     }));
     setIsDropdownOpen(false);
   };
 
   const getPackageOption = (type) => {
-    if (type === 'trial') {
+    if (type === 'basic') {
       return {
-        value: 'trial',
-        label: '🚀 Paket Trial - Rp. 10.000',
-        description: 'Biaya: 10rb + Donasi: 0rb'
+        value: 'basic',
+        label: '💫 Basic - Rp. 100.000',
+        description: 'Paket dasar tanpa jersey'
       };
-    } else if (type === 'starter') {
+    } else if (type === 'basic-jersey') {
       return {
-        value: 'starter',
-        label: '💫 Starter - Rp. 100.000',
-        description: 'Biaya: 80rb + Donasi: 20rb'
+        value: 'basic-jersey',
+        label: '🌟 Basic + Jersey - Rp. 250.000',
+        description: 'Paket dasar dengan jersey'
       };
     } else {
       return {
-        value: 'full',
-        label: '🌟 Full - Rp. 155.000',
-        description: 'Biaya: 135rb + Donasi: 20rb'
+        value: 'jersey-only',
+        label: '👕 Jersey Only - Rp. 150.000',
+        description: 'Hanya jersey'
       };
     }
   };
@@ -77,6 +81,7 @@ export default function RegisterPage() {
     e.preventDefault();
     setIsSubmitting(true);
     setSubmitStatus('');
+    setErrorMessage('');
 
     try {
       const response = await fetch('/api/register', {
@@ -97,8 +102,9 @@ export default function RegisterPage() {
           email: '', 
           phone: '', 
           stravaName: '', 
-          packageType: 'starter',
-          donationAmount: '' 
+          packageType: 'basic',
+          donationAmount: '',
+          jerseySize: ''
         });
         
         // Auto-redirect to payment after 2 seconds
@@ -109,10 +115,12 @@ export default function RegisterPage() {
         }, 2000);
       } else {
         setSubmitStatus('error');
+        setErrorMessage(result.error || 'Terjadi kesalahan. Silakan coba lagi.');
         console.error('Registration failed:', result.error);
       }
     } catch (error) {
       setSubmitStatus('error');
+      setErrorMessage('Terjadi kesalahan jaringan. Silakan coba lagi.');
       console.error('Registration error:', error);
     } finally {
       setIsSubmitting(false);
@@ -121,26 +129,26 @@ export default function RegisterPage() {
 
   // Calculate package details
   const getPackageDetails = () => {
-    if (formData.packageType === 'trial') {
+    if (formData.packageType === 'basic') {
       return {
-        baseAmount: 10000,
+        baseAmount: 100000,
         fixedDonation: 0,
-        total: 10000,
-        name: 'Paket Trial'
-      };
-    } else if (formData.packageType === 'starter') {
-      return {
-        baseAmount: 80000,
-        fixedDonation: 20000,
         total: 100000,
-        name: 'Starter'
+        name: 'Basic'
+      };
+    } else if (formData.packageType === 'basic-jersey') {
+      return {
+        baseAmount: 250000,
+        fixedDonation: 0,
+        total: 250000,
+        name: 'Basic + Jersey'
       };
     } else {
       return {
-        baseAmount: 135000,
-        fixedDonation: 20000,
-        total: 155000,
-        name: 'Full'
+        baseAmount: 150000,
+        fixedDonation: 0,
+        total: 150000,
+        name: 'Jersey Only'
       };
     }
   };
@@ -194,7 +202,7 @@ export default function RegisterPage() {
         <div className="max-w-7xl mx-auto">
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 lg:gap-12 items-stretch">
             {/* Left Side - Image and Text */}
-            <div className="flex flex-col justify-center order-2 lg:order-1">
+            <div className="flex flex-col order-2 lg:order-1">
               {/* Hero Image */}
               <div className="relative flex items-center justify-center p-4 sm:p-6 lg:p-8">
                 <Image 
@@ -305,7 +313,7 @@ export default function RegisterPage() {
 
                 {submitStatus === 'error' && (
                   <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-xl text-sm sm:text-base">
-                    Terjadi kesalahan. Silakan coba lagi.
+                    {errorMessage}
                   </div>
                 )}
 
@@ -337,51 +345,25 @@ export default function RegisterPage() {
                       {/* Custom Dropdown Options */}
                       {isDropdownOpen && (
                         <div className="absolute z-10 w-full mt-2 bg-white border-2 border-gray-200 rounded-2xl shadow-lg overflow-hidden">
-                          {/* Trial Option */}
+                          {/* Basic Option */}
                           <button
                             type="button"
-                            onClick={() => handlePackageSelect('trial')}
+                            onClick={() => handlePackageSelect('basic')}
                             className={`w-full px-4 sm:px-6 py-3 sm:py-4 text-left hover:bg-gray-50 transition-colors duration-200 border-b border-gray-100 last:border-b-0 ${
-                              formData.packageType === 'trial' ? 'bg-green-50 border-green-200' : ''
-                            }`}
-                          >
-                            <div className="flex items-center space-x-3">
-                              <span className="text-2xl">🚀</span>
-                              <div className="flex-1">
-                                <div className="font-semibold text-gray-900 text-base sm:text-lg">
-                                  Paket Trial - Rp. 10.000
-                                </div>
-                                <div className="text-sm text-gray-600">
-                                  Biaya: 10rb + Donasi: 0rb
-                                </div>
-                              </div>
-                              {formData.packageType === 'trial' && (
-                                <svg className="w-5 h-5 text-green-600" fill="currentColor" viewBox="0 0 20 20">
-                                  <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
-                                </svg>
-                              )}
-                            </div>
-                          </button>
-
-                          {/* Starter Option */}
-                          <button
-                            type="button"
-                            onClick={() => handlePackageSelect('starter')}
-                            className={`w-full px-4 sm:px-6 py-3 sm:py-4 text-left hover:bg-gray-50 transition-colors duration-200 border-b border-gray-100 last:border-b-0 ${
-                              formData.packageType === 'starter' ? 'bg-green-50 border-green-200' : ''
+                              formData.packageType === 'basic' ? 'bg-green-50 border-green-200' : ''
                             }`}
                           >
                             <div className="flex items-center space-x-3">
                               <span className="text-2xl">💫</span>
                               <div className="flex-1">
                                 <div className="font-semibold text-gray-900 text-base sm:text-lg">
-                                  Starter - Rp. 100.000
+                                  Basic - Rp. 100.000
                                 </div>
                                 <div className="text-sm text-gray-600">
-                                  Biaya: 80rb + Donasi: 20rb
+                                  Paket dasar tanpa jersey
                                 </div>
                               </div>
-                              {formData.packageType === 'starter' && (
+                              {formData.packageType === 'basic' && (
                                 <svg className="w-5 h-5 text-green-600" fill="currentColor" viewBox="0 0 20 20">
                                   <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
                                 </svg>
@@ -389,25 +371,51 @@ export default function RegisterPage() {
                             </div>
                           </button>
 
-                          {/* Full Option */}
+                          {/* Basic + Jersey Option */}
                           <button
                             type="button"
-                            onClick={() => handlePackageSelect('full')}
-                            className={`w-full px-4 sm:px-6 py-3 sm:py-4 text-left hover:bg-gray-50 transition-colors duration-200 ${
-                              formData.packageType === 'full' ? 'bg-green-50 border-green-200' : ''
+                            onClick={() => handlePackageSelect('basic-jersey')}
+                            className={`w-full px-4 sm:px-6 py-3 sm:py-4 text-left hover:bg-gray-50 transition-colors duration-200 border-b border-gray-100 last:border-b-0 ${
+                              formData.packageType === 'basic-jersey' ? 'bg-green-50 border-green-200' : ''
                             }`}
                           >
                             <div className="flex items-center space-x-3">
                               <span className="text-2xl">🌟</span>
                               <div className="flex-1">
                                 <div className="font-semibold text-gray-900 text-base sm:text-lg">
-                                  Full - Rp. 155.000
+                                  Basic + Jersey - Rp. 250.000
                                 </div>
                                 <div className="text-sm text-gray-600">
-                                  Biaya: 135rb + Donasi: 20rb
+                                  Paket dasar dengan jersey
                                 </div>
                               </div>
-                              {formData.packageType === 'full' && (
+                              {formData.packageType === 'basic-jersey' && (
+                                <svg className="w-5 h-5 text-green-600" fill="currentColor" viewBox="0 0 20 20">
+                                  <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
+                                </svg>
+                              )}
+                            </div>
+                          </button>
+
+                          {/* Jersey Only Option */}
+                          <button
+                            type="button"
+                            onClick={() => handlePackageSelect('jersey-only')}
+                            className={`w-full px-4 sm:px-6 py-3 sm:py-4 text-left hover:bg-gray-50 transition-colors duration-200 ${
+                              formData.packageType === 'jersey-only' ? 'bg-green-50 border-green-200' : ''
+                            }`}
+                          >
+                            <div className="flex items-center space-x-3">
+                              <span className="text-2xl">👕</span>
+                              <div className="flex-1">
+                                <div className="font-semibold text-gray-900 text-base sm:text-lg">
+                                  Jersey Only - Rp. 150.000
+                                </div>
+                                <div className="text-sm text-gray-600">
+                                  Hanya jersey
+                                </div>
+                              </div>
+                              {formData.packageType === 'jersey-only' && (
                                 <svg className="w-5 h-5 text-green-600" fill="currentColor" viewBox="0 0 20 20">
                                   <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
                                 </svg>
@@ -476,40 +484,60 @@ export default function RegisterPage() {
                   </div>
 
                   <div className="space-y-2">
-                    <div className="bg-green-50 border border-green-200 rounded-xl p-3 sm:p-4">
-                      <div className="flex items-center">
-                        <div className="flex-shrink-0">
-                          <svg className="h-5 w-5 text-green-600" fill="currentColor" viewBox="0 0 20 20">
-                            <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
-                          </svg>
-                        </div>
-                        <div className="ml-3">
-                          <p className="text-green-800 font-medium text-sm sm:text-base">
-                            Donasi Tetap untuk Palestina: Rp. 20.000
-                          </p>
-                          <p className="text-green-600 text-xs sm:text-sm mt-1">
-                            Sudah termasuk dalam paket yang dipilih
-                          </p>
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-
-                  <div className="space-y-2">
                     <input
                       type="number"
                       name="donationAmount"
-                      placeholder="Donasi Tambahan (Opsional) - Rp"
+                      placeholder="Donasi Tambahan (Opsional)"
                       value={formData.donationAmount}
                       onChange={handleInputChange}
                       min="0"
-                      step="1000"
                       className="w-full px-4 sm:px-6 lg:px-8 py-1 sm:py-2 lg:py-4 text-base sm:text-lg lg:text-xl border-2 border-gray-200 rounded-full focus:ring-2 focus:ring-green-500 focus:border-green-500 outline-none transition-all duration-200 text-gray-900 placeholder-gray-500"
                     />
-                    <p className="text-xs sm:text-sm text-gray-500 px-4">
-                      Donasi tambahan bersifat sukarela selain donasi tetap Rp. 20.000 yang sudah termasuk.
+                    <p className="text-xs text-gray-500 px-4">
+                      Masukkan jumlah donasi tambahan untuk mendukung Palestina (dalam Rupiah)
                     </p>
                   </div>
+
+                  {/* Jersey Size Field - Only show for packages with jersey */}
+                  {(formData.packageType === 'basic-jersey' || formData.packageType === 'jersey-only') && (
+                    <div className="space-y-2">
+                      <label className="block text-sm font-medium text-gray-700 px-4">
+                        Ukuran Jersey
+                      </label>
+                      <div className="grid grid-cols-3 sm:grid-cols-4 lg:grid-cols-7 gap-2 px-4">
+                        {['XS', 'S', 'M', 'L', 'XL', 'XXL', 'XXXL'].map((size) => (
+                          <label
+                            key={size}
+                            className={`relative flex items-center justify-center p-3 border-2 rounded-lg cursor-pointer transition-all duration-200 hover:border-green-400 ${
+                              formData.jerseySize === size
+                                ? 'border-green-500 bg-green-50 text-green-700'
+                                : 'border-gray-200 hover:bg-gray-50'
+                            }`}
+                          >
+                            <input
+                              type="radio"
+                              name="jerseySize"
+                              value={size}
+                              checked={formData.jerseySize === size}
+                              onChange={handleInputChange}
+                              required
+                              className="sr-only"
+                            />
+                            <span className="font-medium text-sm sm:text-base">
+                              {size}
+                            </span>
+                            {formData.jerseySize === size && (
+                              <div className="absolute -top-1 -right-1 w-4 h-4 bg-green-500 rounded-full flex items-center justify-center">
+                                <svg className="w-2.5 h-2.5 text-white" fill="currentColor" viewBox="0 0 20 20">
+                                  <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
+                                </svg>
+                              </div>
+                            )}
+                          </label>
+                        ))}
+                      </div>
+                    </div>
+                  )}
 
                   <div className="pt-4">
                     <button

@@ -52,7 +52,13 @@ export default function RegisterPage() {
   };
 
   const getPackageOption = (type) => {
-    if (type === 'starter') {
+    if (type === 'trial') {
+      return {
+        value: 'trial',
+        label: '🚀 Paket Trial - Rp. 10.000',
+        description: 'Biaya: 10rb + Donasi: 0rb'
+      };
+    } else if (type === 'starter') {
       return {
         value: 'starter',
         label: '💫 Starter - Rp. 100.000',
@@ -115,7 +121,14 @@ export default function RegisterPage() {
 
   // Calculate package details
   const getPackageDetails = () => {
-    if (formData.packageType === 'starter') {
+    if (formData.packageType === 'trial') {
+      return {
+        baseAmount: 10000,
+        fixedDonation: 0,
+        total: 10000,
+        name: 'Paket Trial'
+      };
+    } else if (formData.packageType === 'starter') {
       return {
         baseAmount: 80000,
         fixedDonation: 20000,
@@ -324,6 +337,32 @@ export default function RegisterPage() {
                       {/* Custom Dropdown Options */}
                       {isDropdownOpen && (
                         <div className="absolute z-10 w-full mt-2 bg-white border-2 border-gray-200 rounded-2xl shadow-lg overflow-hidden">
+                          {/* Trial Option */}
+                          <button
+                            type="button"
+                            onClick={() => handlePackageSelect('trial')}
+                            className={`w-full px-4 sm:px-6 py-3 sm:py-4 text-left hover:bg-gray-50 transition-colors duration-200 border-b border-gray-100 last:border-b-0 ${
+                              formData.packageType === 'trial' ? 'bg-green-50 border-green-200' : ''
+                            }`}
+                          >
+                            <div className="flex items-center space-x-3">
+                              <span className="text-2xl">🚀</span>
+                              <div className="flex-1">
+                                <div className="font-semibold text-gray-900 text-base sm:text-lg">
+                                  Paket Trial - Rp. 10.000
+                                </div>
+                                <div className="text-sm text-gray-600">
+                                  Biaya: 10rb + Donasi: 0rb
+                                </div>
+                              </div>
+                              {formData.packageType === 'trial' && (
+                                <svg className="w-5 h-5 text-green-600" fill="currentColor" viewBox="0 0 20 20">
+                                  <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
+                                </svg>
+                              )}
+                            </div>
+                          </button>
+
                           {/* Starter Option */}
                           <button
                             type="button"

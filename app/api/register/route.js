@@ -70,8 +70,8 @@ async function createMidtransPaymentLink(registrationData, totalAmount = 180000)
 
     // Calculate package amounts
     const packageType = registrationData.packageType || 'starter';
-    const baseAmount = packageType === 'starter' ? 80000 : 135000;
-    const fixedDonation = 20000;
+    const baseAmount = packageType === 'trial' ? 10000 : (packageType === 'starter' ? 80000 : 135000);
+    const fixedDonation = packageType === 'trial' ? 0 : 20000;
     const additionalDonation = registrationData.additionalDonation || 0;
     
     // Calculate the actual total amount including additional donation
@@ -153,7 +153,7 @@ async function createMidtransPaymentLink(registrationData, totalAmount = 180000)
       },
       item_details: itemDetails,
       callbacks: {
-        finish: process.env.PAYMENT_SUCCESS_URL || 'https://werunpalestina.framer.website/',
+        finish: process.env.PAYMENT_SUCCESS_URL || `${process.env.NEXT_PUBLIC_BASE_URL || 'http://localhost:3000'}/success`,
         error: process.env.PAYMENT_ERROR_URL || 'https://werunpalestina.framer.website/register?error=payment_failed',
         pending: process.env.PAYMENT_PENDING_URL || 'https://werunpalestina.framer.website/register?status=pending'
       },
@@ -342,17 +342,18 @@ async function storeRegistrationInGoogleSheets(registrationData) {
             }
             if(key === 'totalAmount') {
                 const packageType = registrationData.packageType || 'starter';
-                const baseAmount = packageType === 'starter' ? 80000 : 135000;
-                const fixedDonation = 20000;
+                const baseAmount = packageType === 'trial' ? 10000 : (packageType === 'starter' ? 80000 : 135000);
+                const fixedDonation = packageType === 'trial' ? 0 : 20000;
                 const additionalDonation = registrationData.additionalDonation || 0;
                 return baseAmount + fixedDonation + additionalDonation;
             }
             if(key === 'baseAmount') {
                 const packageType = registrationData.packageType || 'starter';
-                return packageType === 'starter' ? 80000 : 135000;
+                return packageType === 'trial' ? 10000 : (packageType === 'starter' ? 80000 : 135000);
             }
             if(key === 'fixedDonation') {
-                return 20000;
+                const packageType = registrationData.packageType || 'starter';
+                return packageType === 'trial' ? 0 : 20000;
             }
             return registrationData[key] !== undefined ? registrationData[key] : '';
         })];
@@ -488,8 +489,8 @@ export async function POST(request) {
 
     // Calculate package amounts
     const packageTypeValue = packageType || 'starter';
-    const baseAmount = packageTypeValue === 'starter' ? 80000 : 135000;
-    const fixedDonation = 20000;
+    const baseAmount = packageTypeValue === 'trial' ? 10000 : (packageTypeValue === 'starter' ? 80000 : 135000);
+    const fixedDonation = packageTypeValue === 'trial' ? 0 : 20000;
     const additionalDonation = parseFloat(donationAmount) || 0;
     const packageTotal = baseAmount + fixedDonation; // This is the package price (100000 or 155000)
     const totalAmount = packageTotal + additionalDonation;

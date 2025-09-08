@@ -504,7 +504,7 @@ export default function RegisterPage() {
                         <input
                           type="text"
                           name="simpleAddress"
-                          placeholder="Alamat lengkap"
+                          placeholder="Alamat pengiriman"
                           value={formData.simpleAddress}
                           onChange={handleInputChange}
                           required
@@ -515,13 +515,13 @@ export default function RegisterPage() {
                           onClick={() => setShowFullAddress(true)}
                           className="text-sm text-green-600 hover:text-green-700 font-medium px-4 transition-colors duration-200"
                         >
-                          + Masukkan alamat lengkap dengan detail
+                          + Masukkan alamat pengiriman dengan detail
                         </button>
                       </div>
                     ) : (
                       <div className="space-y-3 bg-gray-50 border border-gray-200 rounded-2xl p-4">
                         <div className="flex items-center justify-between mb-3">
-                          <span className="text-sm font-medium text-gray-700">Alamat Lengkap</span>
+                          <span className="text-sm font-medium text-gray-700">Alamat Pengiriman</span>
                           <button
                             type="button"
                             onClick={() => setShowFullAddress(false)}

@@ -135,20 +135,6 @@ function SuccessContent() {
               </div>
             )}
 
-            {/* Success Illustration */}
-            {/* <div className="mb-8">
-              <div className="relative max-w-md mx-auto">
-                <Image 
-                  src="/images/SuccessPaymentFallback.svg" 
-                  alt="Success Payment Illustration" 
-                  width={400} 
-                  height={300}
-                  className="w-full h-auto rounded-lg"
-                  priority
-                />
-              </div>
-            </div> */}
-
             {/* What's Next Section */}
             <div className="bg-gradient-to-r from-green-100 to-blue-100 rounded-2xl p-6 sm:p-8 mb-8">
               <h2 className="text-xl sm:text-2xl font-semibold text-gray-900 mb-4">

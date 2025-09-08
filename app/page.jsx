@@ -758,7 +758,7 @@ export default function RegisterPage() {
                   <div className="text-center pt-4">
                     <p className="text-xs sm:text-sm text-gray-500 px-2">
                       Dengan mendaftar, Anda menyetujui{' '}
-                      <a href="#" className="text-green-600 hover:text-green-700 font-medium">
+                      <a href="https://www.werunpalestina.id/" className="text-green-600 hover:text-green-700 font-medium">
                         syarat dan ketentuan
                       </a>{' '}
                       yang berlaku.

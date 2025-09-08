@@ -360,6 +360,15 @@ async function storeRegistrationInGoogleSheets(registrationData) {
             'stravaName',
             'packageType',
             'jerseySize',
+            'gender',
+            'completeAddress',
+            'simpleAddress',
+            'fullAddressStreet',
+            'fullAddressRtRw',
+            'fullAddressDistrict',
+            'fullAddressCity',
+            'fullAddressProvince',
+            'fullAddressPostcode',
             'baseAmount',
             'fixedDonation',
             'jerseyPrice',
@@ -377,6 +386,23 @@ async function storeRegistrationInGoogleSheets(registrationData) {
         const dataToAppend = [columnOrder.map(key => {
             if(key === 'timestamp') {
                 return new Date().toISOString(); // Add current timestamp
+            }
+            if(key === 'completeAddress') {
+                // Combine address fields into a single complete address
+                if (registrationData.simpleAddress) {
+                    return registrationData.simpleAddress;
+                } else if (registrationData.fullAddress) {
+                    const addressParts = [
+                        registrationData.fullAddress.street,
+                        registrationData.fullAddress.rtRw,
+                        registrationData.fullAddress.district,
+                        registrationData.fullAddress.city,
+                        registrationData.fullAddress.province,
+                        registrationData.fullAddress.postcode
+                    ].filter(part => part && part.trim() !== '');
+                    return addressParts.join(', ');
+                }
+                return '';
             }
             if(key === 'totalAmount') {
                 const packageType = registrationData.packageType || 'basic';
@@ -425,6 +451,24 @@ async function storeRegistrationInGoogleSheets(registrationData) {
                   return 0;
                 }
             }
+            if (key === 'fullAddressStreet') {
+                return registrationData.fullAddress?.street || '';
+            }
+            if (key === 'fullAddressRtRw') {
+                return registrationData.fullAddress?.rtRw || '';
+            }
+            if (key === 'fullAddressDistrict') {
+                return registrationData.fullAddress?.district || '';
+            }
+            if (key === 'fullAddressCity') {
+                return registrationData.fullAddress?.city || '';
+            }
+            if (key === 'fullAddressProvince') {
+                return registrationData.fullAddress?.province || '';
+            }
+            if (key === 'fullAddressPostcode') {
+                return registrationData.fullAddress?.postcode || '';
+            }
             return registrationData[key] !== undefined ? registrationData[key] : '';
         })];
 
@@ -435,7 +479,7 @@ async function storeRegistrationInGoogleSheets(registrationData) {
         try {
             const response = await sheets.spreadsheets.values.get({
                 spreadsheetId: SPREADSHEET_ID,
-                range: `${SHEET_NAME}!A1:S1`,
+                range: `${SHEET_NAME}!A1:AB1`,
             });
 
             // If sheet is empty, add headers
@@ -450,6 +494,15 @@ async function storeRegistrationInGoogleSheets(registrationData) {
                     'Strava Name',
                     'Package Type',
                     'Jersey Size',
+                    'Gender',
+                    'Complete Address',
+                    'Simple Address',
+                    'Full Address Street',
+                    'Full Address RT/RW',
+                    'Full Address District',
+                    'Full Address City',
+                    'Full Address Province',
+                    'Full Address Postcode',
                     'Base Amount',
                     'Fixed Donation',
                     'Jersey Price',
@@ -465,7 +518,7 @@ async function storeRegistrationInGoogleSheets(registrationData) {
 
                 await sheets.spreadsheets.values.update({
                     spreadsheetId: SPREADSHEET_ID,
-                    range: `${SHEET_NAME}!A1:S1`,
+                    range: `${SHEET_NAME}!A1:AB1`,
                     valueInputOption: 'USER_ENTERED',
                     resource: {
                         values: [headers],
@@ -495,6 +548,12 @@ async function storeRegistrationInGoogleSheets(registrationData) {
         } catch (checkError) {
             console.log('Could not check for duplicates, proceeding with append');
         }
+
+        // Debug: Log the data being appended
+        console.log('Data being appended to Google Sheets:');
+        console.log('Column order:', columnOrder);
+        console.log('Data values:', dataToAppend[0]);
+        console.log('MidtransOrderId will be stored in column AB (index 27):', dataToAppend[0][27]);
 
         // Append the registration data
         const appendRange = `${SHEET_NAME}!A2`; // Start appending from row 2, keep row 1 as headers
@@ -536,7 +595,7 @@ export async function POST(request) {
     const body = await request.json();
     console.log('Request body received:', body);
     
-    const { name, email, phone, stravaName, packageType, donationAmount, jerseySize } = body;
+    const { name, email, phone, stravaName, packageType, donationAmount, jerseySize, gender, simpleAddress, fullAddress } = body;
 
     // Validate required fields
     if (!name || !email || !phone || !stravaName || !packageType) {
@@ -552,6 +611,24 @@ export async function POST(request) {
       console.log('Validation failed: jersey size required for selected package');
       return NextResponse.json(
         { error: 'Jersey size is required for selected package' },
+        { status: 400 }
+      );
+    }
+
+    // Validate gender for packages that require it
+    if ((packageType === 'basic-jersey' || packageType === 'jersey-only') && !gender) {
+      console.log('Validation failed: gender required for selected package');
+      return NextResponse.json(
+        { error: 'Gender is required for selected package' },
+        { status: 400 }
+      );
+    }
+
+    // Validate address - either simple address or full address is required
+    if (!simpleAddress && (!fullAddress || !fullAddress.street || !fullAddress.city || !fullAddress.province)) {
+      console.log('Validation failed: address information is required');
+      return NextResponse.json(
+        { error: 'Address information is required' },
         { status: 400 }
       );
     }
@@ -613,6 +690,16 @@ export async function POST(request) {
       stravaName: stravaName.trim(),
       packageType: packageTypeValue,
       jerseySize: jerseySize || '',
+      gender: gender || '',
+      simpleAddress: simpleAddress || '',
+      fullAddress: fullAddress || {
+        street: '',
+        rtRw: '',
+        district: '',
+        city: '',
+        province: '',
+        postcode: ''
+      },
       baseAmount: baseAmount,
       fixedDonation: fixedDonation,
       jerseyPrice: jerseyPrice,
@@ -715,7 +802,7 @@ export async function GET(request) {
     const sheets = await getGoogleSheetsClient();
     const response = await sheets.spreadsheets.values.get({
       spreadsheetId: SPREADSHEET_ID,
-      range: `${SHEET_NAME}!A2:S1000`, // Skip header row, get up to 1000 rows (now up to column S)
+      range: `${SHEET_NAME}!A2:AB1000`, // Skip header row, get up to 1000 rows (now up to column AB for complete address and midtrans order ID)
     });
 
     const rows = response.data.values || [];
@@ -731,17 +818,28 @@ export async function GET(request) {
       stravaName: row[5] || '',
       packageType: row[6] || 'basic',
       jerseySize: row[7] || '',
-      baseAmount: parseFloat(row[8]) || 0,
-      fixedDonation: parseFloat(row[9]) || 0,
-      jerseyPrice: parseFloat(row[10]) || 0,
-      additionalDonation: parseFloat(row[11]) || 0,
-      registrationDate: row[12] || '',
-      status: row[13] || 'pending',
-      paymentStatus: row[14] || 'unpaid',
-      totalAmount: parseFloat(row[15]) || 100000,
-      donationDate: row[16] || null,
-      paymentLink: row[17] || '',
-      midtransOrderId: row[18] || ''
+      gender: row[8] || '',
+      completeAddress: row[9] || '',
+      simpleAddress: row[10] || '',
+      fullAddress: {
+        street: row[11] || '',
+        rtRw: row[12] || '',
+        district: row[13] || '',
+        city: row[14] || '',
+        province: row[15] || '',
+        postcode: row[16] || ''
+      },
+      baseAmount: parseFloat(row[17]) || 0,
+      fixedDonation: parseFloat(row[18]) || 0,
+      jerseyPrice: parseFloat(row[19]) || 0,
+      additionalDonation: parseFloat(row[20]) || 0,
+      registrationDate: row[21] || '',
+      status: row[22] || 'pending',
+      paymentStatus: row[23] || 'unpaid',
+      totalAmount: parseFloat(row[24]) || 100000,
+      donationDate: row[25] || null,
+      paymentLink: row[26] || '',
+      midtransOrderId: row[27] || ''
     })).filter(reg => reg.id); // Filter out empty rows
 
     // Return summary without sensitive data

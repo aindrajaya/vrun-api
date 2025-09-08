@@ -12,7 +12,17 @@ export default function RegisterPage() {
     stravaName: '',
     packageType: 'basic',
     donationAmount: '',
-    jerseySize: ''
+    jerseySize: '',
+    gender: '',
+    simpleAddress: '',
+    fullAddress: {
+      street: '',
+      rtRw: '',
+      district: '',
+      city: '',
+      province: '',
+      postcode: ''
+    }
   });
 
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -21,6 +31,7 @@ export default function RegisterPage() {
   const [paymentData, setPaymentData] = useState(null);
   const [redirectCountdown, setRedirectCountdown] = useState(null);
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
+  const [showFullAddress, setShowFullAddress] = useState(false);
   const dropdownRef = useRef(null);
 
   // Close dropdown when clicking outside
@@ -39,10 +50,21 @@ export default function RegisterPage() {
 
   const handleInputChange = (e) => {
     const { name, value } = e.target;
-    setFormData(prev => ({
-      ...prev,
-      [name]: value
-    }));
+    if (name.startsWith('fullAddress.')) {
+      const addressField = name.split('.')[1];
+      setFormData(prev => ({
+        ...prev,
+        fullAddress: {
+          ...prev.fullAddress,
+          [addressField]: value
+        }
+      }));
+    } else {
+      setFormData(prev => ({
+        ...prev,
+        [name]: value
+      }));
+    }
   };
 
   const handlePackageSelect = (packageType) => {
@@ -50,7 +72,9 @@ export default function RegisterPage() {
       ...prev,
       packageType: packageType,
       // Reset jersey size if switching to basic package
-      jerseySize: packageType === 'basic' ? '' : prev.jerseySize
+      jerseySize: packageType === 'basic' ? '' : prev.jerseySize,
+      // Reset gender if switching to basic package (gender only needed for jersey packages)
+      gender: packageType === 'basic' ? '' : prev.gender
     }));
     setIsDropdownOpen(false);
   };
@@ -104,7 +128,17 @@ export default function RegisterPage() {
           stravaName: '', 
           packageType: 'basic',
           donationAmount: '',
-          jerseySize: ''
+          jerseySize: '',
+          gender: '',
+          simpleAddress: '',
+          fullAddress: {
+            street: '',
+            rtRw: '',
+            district: '',
+            city: '',
+            province: '',
+            postcode: ''
+          }
         });
         
         // Auto-redirect to payment after 2 seconds
@@ -459,6 +493,110 @@ export default function RegisterPage() {
                     />
                   </div>
 
+                  {/* Address Section - Moved below email */}
+                  <div className="space-y-3">
+                    <label className="block text-sm font-medium text-gray-700 px-4">
+                      Alamat
+                    </label>
+                    
+                    {!showFullAddress ? (
+                      <div className="space-y-2">
+                        <input
+                          type="text"
+                          name="simpleAddress"
+                          placeholder="Alamat lengkap"
+                          value={formData.simpleAddress}
+                          onChange={handleInputChange}
+                          required
+                          className="w-full px-4 sm:px-6 lg:px-8 py-1 sm:py-2 lg:py-4 text-base sm:text-lg lg:text-xl border-2 border-gray-200 rounded-full focus:ring-2 focus:ring-green-500 focus:border-green-500 outline-none transition-all duration-200 text-gray-900 placeholder-gray-500"
+                        />
+                        <button
+                          type="button"
+                          onClick={() => setShowFullAddress(true)}
+                          className="text-sm text-green-600 hover:text-green-700 font-medium px-4 transition-colors duration-200"
+                        >
+                          + Masukkan alamat lengkap dengan detail
+                        </button>
+                      </div>
+                    ) : (
+                      <div className="space-y-3 bg-gray-50 border border-gray-200 rounded-2xl p-4">
+                        <div className="flex items-center justify-between mb-3">
+                          <span className="text-sm font-medium text-gray-700">Alamat Lengkap</span>
+                          <button
+                            type="button"
+                            onClick={() => setShowFullAddress(false)}
+                            className="text-sm text-gray-500 hover:text-gray-700 transition-colors duration-200"
+                          >
+                            Gunakan alamat sederhana
+                          </button>
+                        </div>
+                        
+                        <div className="grid grid-cols-1 gap-3">
+                          <input
+                            type="text"
+                            name="fullAddress.street"
+                            placeholder="Alamat jalan / nama jalan"
+                            value={formData.fullAddress.street}
+                            onChange={handleInputChange}
+                            required={showFullAddress}
+                            className="w-full px-4 py-3 text-base border-2 border-gray-200 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500 outline-none transition-all duration-200 text-gray-900 placeholder-gray-500"
+                          />
+                          
+                          <div className="grid grid-cols-2 gap-3">
+                            <input
+                              type="text"
+                              name="fullAddress.rtRw"
+                              placeholder="RT/RW"
+                              value={formData.fullAddress.rtRw}
+                              onChange={handleInputChange}
+                              className="w-full px-4 py-3 text-base border-2 border-gray-200 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500 outline-none transition-all duration-200 text-gray-900 placeholder-gray-500"
+                            />
+                            <input
+                              type="text"
+                              name="fullAddress.district"
+                              placeholder="Kelurahan/Desa"
+                              value={formData.fullAddress.district}
+                              onChange={handleInputChange}
+                              required={showFullAddress}
+                              className="w-full px-4 py-3 text-base border-2 border-gray-200 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500 outline-none transition-all duration-200 text-gray-900 placeholder-gray-500"
+                            />
+                          </div>
+                          
+                          <div className="grid grid-cols-2 gap-3">
+                            <input
+                              type="text"
+                              name="fullAddress.city"
+                              placeholder="Kota/Kabupaten"
+                              value={formData.fullAddress.city}
+                              onChange={handleInputChange}
+                              required={showFullAddress}
+                              className="w-full px-4 py-3 text-base border-2 border-gray-200 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500 outline-none transition-all duration-200 text-gray-900 placeholder-gray-500"
+                            />
+                            <input
+                              type="text"
+                              name="fullAddress.province"
+                              placeholder="Provinsi"
+                              value={formData.fullAddress.province}
+                              onChange={handleInputChange}
+                              required={showFullAddress}
+                              className="w-full px-4 py-3 text-base border-2 border-gray-200 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500 outline-none transition-all duration-200 text-gray-900 placeholder-gray-500"
+                            />
+                          </div>
+                          
+                          <input
+                            type="text"
+                            name="fullAddress.postcode"
+                            placeholder="Kode pos"
+                            value={formData.fullAddress.postcode}
+                            onChange={handleInputChange}
+                            required={showFullAddress}
+                            className="w-full px-4 py-3 text-base border-2 border-gray-200 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500 outline-none transition-all duration-200 text-gray-900 placeholder-gray-500"
+                          />
+                        </div>
+                      </div>
+                    )}
+                  </div>
+
                   <div className="space-y-2">
                     <input
                       type="tel"
@@ -497,6 +635,68 @@ export default function RegisterPage() {
                       Masukkan jumlah donasi tambahan untuk mendukung Palestina (dalam Rupiah)
                     </p>
                   </div>
+
+                  {/* Gender Field - Only show for packages with jersey */}
+                  {(formData.packageType === 'basic-jersey' || formData.packageType === 'jersey-only') && (
+                    <div className="space-y-2">
+                      <label className="block text-sm font-medium text-gray-700 px-4">
+                        Jenis Kelamin
+                      </label>
+                      <div className="grid grid-cols-2 gap-3 px-4">
+                        <label className={`relative flex items-center justify-center p-3 border-2 rounded-lg cursor-pointer transition-all duration-200 hover:border-green-400 ${
+                          formData.gender === 'Laki-laki'
+                            ? 'border-green-500 bg-green-50 text-green-700'
+                            : 'border-gray-200 hover:bg-gray-50'
+                        }`}>
+                          <input
+                            type="radio"
+                            name="gender"
+                            value="Laki-laki"
+                            checked={formData.gender === 'Laki-laki'}
+                            onChange={handleInputChange}
+                            required
+                            className="sr-only"
+                          />
+                          <span className="font-medium text-sm sm:text-base">
+                            Laki-laki
+                          </span>
+                          {formData.gender === 'Laki-laki' && (
+                            <div className="absolute -top-1 -right-1 w-4 h-4 bg-green-500 rounded-full flex items-center justify-center">
+                              <svg className="w-2.5 h-2.5 text-white" fill="currentColor" viewBox="0 0 20 20">
+                                <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
+                              </svg>
+                            </div>
+                          )}
+                        </label>
+                        
+                        <label className={`relative flex items-center justify-center p-3 border-2 rounded-lg cursor-pointer transition-all duration-200 hover:border-green-400 ${
+                          formData.gender === 'Perempuan'
+                            ? 'border-green-500 bg-green-50 text-green-700'
+                            : 'border-gray-200 hover:bg-gray-50'
+                        }`}>
+                          <input
+                            type="radio"
+                            name="gender"
+                            value="Perempuan"
+                            checked={formData.gender === 'Perempuan'}
+                            onChange={handleInputChange}
+                            required
+                            className="sr-only"
+                          />
+                          <span className="font-medium text-sm sm:text-base">
+                            Perempuan
+                          </span>
+                          {formData.gender === 'Perempuan' && (
+                            <div className="absolute -top-1 -right-1 w-4 h-4 bg-green-500 rounded-full flex items-center justify-center">
+                              <svg className="w-2.5 h-2.5 text-white" fill="currentColor" viewBox="0 0 20 20">
+                                <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
+                              </svg>
+                            </div>
+                          )}
+                        </label>
+                      </div>
+                    </div>
+                  )}
 
                   {/* Jersey Size Field - Only show for packages with jersey */}
                   {(formData.packageType === 'basic-jersey' || formData.packageType === 'jersey-only') && (

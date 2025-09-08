@@ -132,16 +132,28 @@ async function getRegistrationFromGoogleSheets(orderId) {
         // Get all registration data
         const response = await sheets.spreadsheets.values.get({
             spreadsheetId: SPREADSHEET_ID,
-            range: `${SHEET_NAME}!A:S`, // Get all columns including midtransOrderId in column S
+            range: `${SHEET_NAME}!A:AB`, // Get all columns including new complete address field (up to column AB)
         });
 
         const rows = response.data.values || [];
         console.log(`Searching for order ID: ${orderId} in ${rows.length} rows`);
+        
+        // Debug: Log the structure of a few rows to understand the data layout
+        if (rows.length > 1) {
+            console.log('=== DEBUGGING SHEET STRUCTURE ===');
+            console.log('Header row (row 0):', rows[0]?.length, 'columns');
+            console.log('First data row (row 1) structure:');
+            console.log('  Row length:', rows[1]?.length);
+            console.log('  Column AA (index 26) - Should be Payment Link:', rows[1]?.[26]);
+            console.log('  Column AB (index 27) - Should be Midtrans Order ID:', rows[1]?.[27]);
+            console.log('  Column AC (index 28) - Should be empty:', rows[1]?.[28]);
+            console.log('=== END DEBUGGING ===');
+        }
 
-        // Find registration by midtransOrderId (should be in column S, index 18)
+        // Find registration by midtransOrderId (should be in column AB, index 27)
         for (let i = 1; i < rows.length; i++) { // Skip header row
             const row = rows[i];
-            const rowOrderId = row[18]; // Column S (0-indexed = 18) - midtransOrderId
+            const rowOrderId = row[27]; // Column AB (0-indexed = 27) - midtransOrderId
             
             if (rowOrderId) {
                 // First try exact match
@@ -156,17 +168,28 @@ async function getRegistrationFromGoogleSheets(orderId) {
                         stravaName: row[5] || '', // Column F - Strava Name
                         packageType: row[6] || 'basic', // Column G - Package Type
                         jerseySize: row[7] || '', // Column H - Jersey Size
-                        baseAmount: parseFloat(row[8]) || 80000, // Column I - Base Amount
-                        fixedDonation: parseFloat(row[9]) || 20000, // Column J - Fixed Donation
-                        jerseyPrice: parseFloat(row[10]) || 0, // Column K - Jersey Price
-                        additionalDonation: parseFloat(row[11]) || 0, // Column L - Additional Donation
-                        registrationDate: row[12] || '', // Column M - Registration Date
-                        status: row[13] || 'pending', // Column N - Status
-                        paymentStatus: row[14] || 'pending', // Column O - Payment Status
-                        totalAmount: parseFloat(row[15]) || 100000, // Column P - Total Amount
-                        donationDate: row[16] || '', // Column Q - Donation Date
-                        paymentLink: row[17] || '', // Column R - Payment Link
-                        orderId: row[18] || '' // Column S - Midtrans Order ID
+                        gender: row[8] || '', // Column I - Gender
+                        completeAddress: row[9] || '', // Column J - Complete Address
+                        simpleAddress: row[10] || '', // Column K - Simple Address
+                        fullAddress: {
+                            street: row[11] || '', // Column L - Full Address Street
+                            rtRw: row[12] || '', // Column M - Full Address RT/RW
+                            district: row[13] || '', // Column N - Full Address District
+                            city: row[14] || '', // Column O - Full Address City
+                            province: row[15] || '', // Column P - Full Address Province
+                            postcode: row[16] || '' // Column Q - Full Address Postcode
+                        },
+                        baseAmount: parseFloat(row[17]) || 100000, // Column R - Base Amount
+                        fixedDonation: parseFloat(row[18]) || 0, // Column S - Fixed Donation
+                        jerseyPrice: parseFloat(row[19]) || 0, // Column T - Jersey Price
+                        additionalDonation: parseFloat(row[20]) || 0, // Column U - Additional Donation
+                        registrationDate: row[21] || '', // Column V - Registration Date
+                        status: row[22] || 'pending', // Column W - Status
+                        paymentStatus: row[23] || 'pending', // Column X - Payment Status
+                        totalAmount: parseFloat(row[24]) || 100000, // Column Y - Total Amount
+                        donationDate: row[25] || '', // Column Z - Donation Date
+                        paymentLink: row[26] || '', // Column AA - Payment Link
+                        orderId: row[27] || '' // Column AB - Midtrans Order ID
                     };
                 }
                 
@@ -182,17 +205,28 @@ async function getRegistrationFromGoogleSheets(orderId) {
                         stravaName: row[5] || '', // Column F - Strava Name
                         packageType: row[6] || 'basic', // Column G - Package Type
                         jerseySize: row[7] || '', // Column H - Jersey Size
-                        baseAmount: parseFloat(row[8]) || 80000, // Column I - Base Amount
-                        fixedDonation: parseFloat(row[9]) || 20000, // Column J - Fixed Donation
-                        jerseyPrice: parseFloat(row[10]) || 0, // Column K - Jersey Price
-                        additionalDonation: parseFloat(row[11]) || 0, // Column L - Additional Donation
-                        registrationDate: row[12] || '', // Column M - Registration Date
-                        status: row[13] || 'pending', // Column N - Status
-                        paymentStatus: row[14] || 'pending', // Column O - Payment Status
-                        totalAmount: parseFloat(row[15]) || 100000, // Column P - Total Amount
-                        donationDate: row[16] || '', // Column Q - Donation Date
-                        paymentLink: row[17] || '', // Column R - Payment Link
-                        orderId: row[18] || '' // Column S - Midtrans Order ID
+                        gender: row[8] || '', // Column I - Gender
+                        completeAddress: row[9] || '', // Column J - Complete Address
+                        simpleAddress: row[10] || '', // Column K - Simple Address
+                        fullAddress: {
+                            street: row[11] || '', // Column L - Full Address Street
+                            rtRw: row[12] || '', // Column M - Full Address RT/RW
+                            district: row[13] || '', // Column N - Full Address District
+                            city: row[14] || '', // Column O - Full Address City
+                            province: row[15] || '', // Column P - Full Address Province
+                            postcode: row[16] || '' // Column Q - Full Address Postcode
+                        },
+                        baseAmount: parseFloat(row[17]) || 100000, // Column R - Base Amount
+                        fixedDonation: parseFloat(row[18]) || 0, // Column S - Fixed Donation
+                        jerseyPrice: parseFloat(row[19]) || 0, // Column T - Jersey Price
+                        additionalDonation: parseFloat(row[20]) || 0, // Column U - Additional Donation
+                        registrationDate: row[21] || '', // Column V - Registration Date
+                        status: row[22] || 'pending', // Column W - Status
+                        paymentStatus: row[23] || 'pending', // Column X - Payment Status
+                        totalAmount: parseFloat(row[24]) || 100000, // Column Y - Total Amount
+                        donationDate: row[25] || '', // Column Z - Donation Date
+                        paymentLink: row[26] || '', // Column AA - Payment Link
+                        orderId: row[27] || '' // Column AB - Midtrans Order ID
                     };
                 }
                 
@@ -208,17 +242,28 @@ async function getRegistrationFromGoogleSheets(orderId) {
                         stravaName: row[5] || '', // Column F - Strava Name
                         packageType: row[6] || 'basic', // Column G - Package Type
                         jerseySize: row[7] || '', // Column H - Jersey Size
-                        baseAmount: parseFloat(row[8]) || 80000, // Column I - Base Amount
-                        fixedDonation: parseFloat(row[9]) || 20000, // Column J - Fixed Donation
-                        jerseyPrice: parseFloat(row[10]) || 0, // Column K - Jersey Price
-                        additionalDonation: parseFloat(row[11]) || 0, // Column L - Additional Donation
-                        registrationDate: row[12] || '', // Column M - Registration Date
-                        status: row[13] || 'pending', // Column N - Status
-                        paymentStatus: row[14] || 'pending', // Column O - Payment Status
-                        totalAmount: parseFloat(row[15]) || 100000, // Column P - Total Amount
-                        donationDate: row[16] || '', // Column Q - Donation Date
-                        paymentLink: row[17] || '', // Column R - Payment Link
-                        orderId: row[18] || '' // Column S - Midtrans Order ID
+                        gender: row[8] || '', // Column I - Gender
+                        completeAddress: row[9] || '', // Column J - Complete Address
+                        simpleAddress: row[10] || '', // Column K - Simple Address
+                        fullAddress: {
+                            street: row[11] || '', // Column L - Full Address Street
+                            rtRw: row[12] || '', // Column M - Full Address RT/RW
+                            district: row[13] || '', // Column N - Full Address District
+                            city: row[14] || '', // Column O - Full Address City
+                            province: row[15] || '', // Column P - Full Address Province
+                            postcode: row[16] || '' // Column Q - Full Address Postcode
+                        },
+                        baseAmount: parseFloat(row[17]) || 100000, // Column R - Base Amount
+                        fixedDonation: parseFloat(row[18]) || 0, // Column S - Fixed Donation
+                        jerseyPrice: parseFloat(row[19]) || 0, // Column T - Jersey Price
+                        additionalDonation: parseFloat(row[20]) || 0, // Column U - Additional Donation
+                        registrationDate: row[21] || '', // Column V - Registration Date
+                        status: row[22] || 'pending', // Column W - Status
+                        paymentStatus: row[23] || 'pending', // Column X - Payment Status
+                        totalAmount: parseFloat(row[24]) || 100000, // Column Y - Total Amount
+                        donationDate: row[25] || '', // Column Z - Donation Date
+                        paymentLink: row[26] || '', // Column AA - Payment Link
+                        orderId: row[27] || '' // Column AB - Midtrans Order ID
                     };
                 }
             }
@@ -249,7 +294,7 @@ async function updateRegistrationInGoogleSheets(orderId, transactionStatus, paym
         // Get all data to find the row with matching order ID
         const response = await sheets.spreadsheets.values.get({
             spreadsheetId: SPREADSHEET_ID,
-            range: `${SHEET_NAME}!A:S`, // Get all columns (now S columns)
+            range: `${SHEET_NAME}!A:AB`, // Get all columns (now AB columns with complete address field)
         });
 
         const rows = response.data.values || [];
@@ -258,7 +303,7 @@ async function updateRegistrationInGoogleSheets(orderId, transactionStatus, paym
             return { success: false, message: 'No data found in sheet' };
         }
 
-        // Find the row with matching Midtrans Order ID (column S, index 18)
+        // Find the row with matching Midtrans Order ID (column AA, index 26)
         // Handle both exact matches and partial matches (in case Midtrans appends timestamps)
         let targetRowIndex = -1;
         let foundOrderId = null;
@@ -266,7 +311,7 @@ async function updateRegistrationInGoogleSheets(orderId, transactionStatus, paym
         console.log(`Searching for order ID: "${orderId}" in ${rows.length - 1} rows`);
         
         for (let i = 1; i < rows.length; i++) { // Skip header row
-            const midtransOrderId = rows[i][18]; // Column S (index 18) - Midtrans Order ID
+            const midtransOrderId = rows[i][27]; // Column AB (index 27) - Midtrans Order ID
             
             if (midtransOrderId) {
                 console.log(`Row ${i}: Comparing stored="${midtransOrderId}" with received="${orderId}"`);
@@ -321,9 +366,11 @@ async function updateRegistrationInGoogleSheets(orderId, transactionStatus, paym
             console.log('❌ Order ID not found in sheet:', orderId);
             console.log('Available order IDs in sheet:');
             for (let i = 1; i < Math.min(rows.length, 10); i++) { // Show first 10 for debugging
-                const midtransOrderId = rows[i][18]; // Column S (index 18) - Midtrans Order ID
+                const midtransOrderId = rows[i][27]; // Column AB (index 27) - Midtrans Order ID
                 if (midtransOrderId) {
                     console.log(`  Row ${i + 1}: "${midtransOrderId}"`);
+                } else {
+                    console.log(`  Row ${i + 1}: <empty or undefined>`);
                 }
             }
             return { success: false, message: 'Order ID not found in sheet' };
@@ -357,14 +404,14 @@ async function updateRegistrationInGoogleSheets(orderId, transactionStatus, paym
 
         console.log(`Updating row ${targetRowIndex}: status=${newStatus}, paymentStatus=${newPaymentStatus}`);
 
-        // Update status (column N) and payment status (column O)
+        // Update status (column V) and payment status (column W)
         const updates = [
             {
-                range: `${SHEET_NAME}!N${targetRowIndex}`, // Status column
+                range: `${SHEET_NAME}!W${targetRowIndex}`, // Status column (was V, now W due to complete address column)
                 values: [[newStatus]]
             },
             {
-                range: `${SHEET_NAME}!O${targetRowIndex}`, // Payment Status column
+                range: `${SHEET_NAME}!X${targetRowIndex}`, // Payment Status column (was W, now X due to complete address column)
                 values: [[newPaymentStatus]]
             }
         ];

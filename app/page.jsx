@@ -495,10 +495,6 @@ export default function RegisterPage() {
 
                   {/* Address Section - Moved below email */}
                   <div className="space-y-3">
-                    <label className="block text-sm font-medium text-gray-700 px-4">
-                      Alamat
-                    </label>
-                    
                     {!showFullAddress ? (
                       <div className="space-y-2">
                         <input

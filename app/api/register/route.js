@@ -189,7 +189,7 @@ async function createMidtransPaymentLink(registrationData, totalAmount = 180000)
       },
       item_details: itemDetails,
       callbacks: {
-        finish: process.env.PAYMENT_SUCCESS_URL || `${process.env.NEXT_PUBLIC_BASE_URL || 'https://register.werunpalestina.id'}/success`,
+        finish: process.env.PAYMENT_SUCCESS_URL || `${process.env.NEXT_PUBLIC_BASE_URL || 'https://registrasi.werunpalestina.id'}/success`,
         error: process.env.PAYMENT_ERROR_URL || 'https://werunpalestina.framer.website/register?error=payment_failed',
         pending: process.env.PAYMENT_PENDING_URL || 'https://werunpalestina.framer.website/register?status=pending'
       },

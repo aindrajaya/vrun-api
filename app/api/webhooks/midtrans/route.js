@@ -7,26 +7,32 @@ import { google } from 'googleapis';
 // Google Sheets API configuration
 const SPREADSHEET_ID = process.env.GOOGLE_SHEET_ID || 'YOUR_SPREADSHEET_ID';
 const SHEET_NAME = process.env.GOOGLE_SHEET_NAME || 'WRP_Registrations';
+
+// Jersey Database Google Sheets configuration
+const JERSEY_SPREADSHEET_ID = '1gjNVdzZFaJOoVM7MUgQBN7WS8mxg1btwmXDpnvNrLao';
+const JERSEY_SHEET_NAME = 'Sheet1';
+
 const SCOPES = ['https://www.googleapis.com/auth/spreadsheets'];
 
 // Midtrans configuration
 const MIDTRANS_SERVER_KEY = process.env.MIDTRANS_SERVER_KEY;
 
 // n8n webhook configuration
-const N8N_WEBHOOK_URL = process.env.N8N_WEBHOOK_URL || 'https://n8n-oo1yqkmi2l7g.blueberry.sumopod.my.id/webhook/f0aae5da-7ca3-4c2c-af78-500367bde5d2';
+const N8N_REGISTRATION_WEBHOOK_URL = process.env.N8N_REGISTRATION_WEBHOOK_URL || 'https://n8n-oo1yqkmi2l7g.blueberry.sumopod.my.id/webhook/f0aae5da-7ca3-4c2c-af78-500367bde5d2';
+const N8N_JERSEY_WEBHOOK_URL = process.env.N8N_JERSEY_WEBHOOK_URL || 'https://n8n-oo1yqkmi2l7g.blueberry.sumopod.my.id/webhook/dc687746-6f94-4467-9d94-f4d0704e4eb6';
 
 /**
- * Sends payment success notification to n8n webhook
+ * Sends registration payment success notification to n8n webhook
  * @param {Object} paymentData - Payment data from Midtrans
  * @param {Object} registrationData - Registration data from local/sheets
  * @returns {Promise<Object>} - n8n webhook response
  */
-async function sendPaymentSuccessToN8n(paymentData, registrationData = null) {
+async function sendRegistrationSuccessToN8n(paymentData, registrationData) {
     try {
-        console.log('Sending payment success notification to n8n...');
+        console.log('Sending registration payment success notification to n8n...');
         
         const webhookPayload = {
-            event: 'payment_success',
+            event: 'registration_payment_success',
             timestamp: new Date().toISOString(),
             payment: {
                 order_id: paymentData.order_id,
@@ -35,7 +41,7 @@ async function sendPaymentSuccessToN8n(paymentData, registrationData = null) {
                 gross_amount: paymentData.gross_amount,
                 fraud_status: paymentData.fraud_status
             },
-            registration: registrationData ? {
+            registration: {
                 id: registrationData.id,
                 name: registrationData.name,
                 email: registrationData.email,
@@ -49,39 +55,108 @@ async function sendPaymentSuccessToN8n(paymentData, registrationData = null) {
                 additionalDonation: registrationData.additionalDonation || 0,
                 totalAmount: registrationData.totalAmount || parseInt(paymentData.gross_amount),
                 registrationDate: registrationData.registrationDate
-            } : null
+            }
         };
 
+        return await sendToN8nWebhook(N8N_REGISTRATION_WEBHOOK_URL, webhookPayload, 'registration');
+
+    } catch (error) {
+        console.error('Error calling registration n8n webhook:', error.message);
+        return { 
+            success: false, 
+            error: error.message 
+        };
+    }
+}
+
+/**
+ * Sends jersey payment success notification to n8n webhook
+ * @param {Object} paymentData - Payment data from Midtrans
+ * @param {Object} jerseyData - Jersey order data from sheets
+ * @returns {Promise<Object>} - n8n webhook response
+ */
+async function sendJerseySuccessToN8n(paymentData, jerseyData) {
+    try {
+        console.log('Sending jersey payment success notification to n8n...');
+        
+        const webhookPayload = {
+            event: 'jersey_payment_success',
+            timestamp: new Date().toISOString(),
+            payment: {
+                order_id: paymentData.order_id,
+                transaction_status: paymentData.transaction_status,
+                payment_type: paymentData.payment_type,
+                gross_amount: paymentData.gross_amount,
+                fraud_status: paymentData.fraud_status
+            },
+            jersey: {
+                name: jerseyData.name,
+                email: jerseyData.email,
+                phone: jerseyData.phone,
+                jerseySize: jerseyData.jerseySize,
+                quantity: jerseyData.quantity,
+                fixedPrice: jerseyData.fixedPrice,
+                totalAmount: jerseyData.totalAmount || parseInt(paymentData.gross_amount),
+                orderDate: jerseyData.orderDate,
+                address: jerseyData.address,
+                rtRw: jerseyData.rtRw,
+                district: jerseyData.district,
+                city: jerseyData.city,
+                province: jerseyData.province,
+                postcode: jerseyData.postcode
+            }
+        };
+
+        return await sendToN8nWebhook(N8N_JERSEY_WEBHOOK_URL, webhookPayload, 'jersey');
+
+    } catch (error) {
+        console.error('Error calling jersey n8n webhook:', error.message);
+        return { 
+            success: false, 
+            error: error.message 
+        };
+    }
+}
+
+/**
+ * Generic function to send data to n8n webhook
+ * @param {string} webhookUrl - n8n webhook URL
+ * @param {Object} payload - Data to send
+ * @param {string} type - Type of webhook (registration/jersey)
+ * @returns {Promise<Object>} - Webhook response
+ */
+async function sendToN8nWebhook(webhookUrl, payload, type) {
+    try {
         // Prepare headers
         const headers = {
             'Content-Type': 'application/json',
-            'User-Agent': 'WRP-Webhook/1.0'
+            'User-Agent': `WRP-${type}-Webhook/1.0`
         };
 
-        console.log('Sending to n8n:', {
-            url: N8N_WEBHOOK_URL,
-            payload: JSON.stringify(webhookPayload, null, 2)
+        console.log(`Sending to ${type} n8n webhook:`, {
+            url: webhookUrl,
+            payload: JSON.stringify(payload, null, 2)
         });
 
-        const response = await fetch(N8N_WEBHOOK_URL, {
+        const response = await fetch(webhookUrl, {
             method: 'POST',
             headers: headers,
-            body: JSON.stringify(webhookPayload),
+            body: JSON.stringify(payload),
             signal: AbortSignal.timeout(10000) // 10 second timeout
         });
 
         const responseText = await response.text();
         
         if (response.ok) {
-            console.log('✅ n8n webhook called successfully:', response.status);
-            console.log('n8n response:', responseText);
+            console.log(`✅ ${type} n8n webhook called successfully:`, response.status);
+            console.log(`${type} n8n response:`, responseText);
             return { 
                 success: true, 
                 status: response.status,
                 response: responseText 
             };
         } else {
-            console.error('❌ n8n webhook failed:', response.status, responseText);
+            console.error(`❌ ${type} n8n webhook failed:`, response.status, responseText);
             return { 
                 success: false, 
                 status: response.status,
@@ -90,7 +165,7 @@ async function sendPaymentSuccessToN8n(paymentData, registrationData = null) {
         }
 
     } catch (error) {
-        console.error('Error calling n8n webhook:', error.message);
+        console.error(`Error calling ${type} n8n webhook:`, error.message);
         return { 
             success: false, 
             error: error.message 
@@ -275,6 +350,155 @@ async function getRegistrationFromGoogleSheets(orderId) {
     } catch (error) {
         console.error('Error fetching registration from Google Sheets:', error.message);
         return null;
+    }
+}
+
+/**
+ * Gets jersey order data from Jersey Google Sheets by order ID
+ * @param {string} orderId - Midtrans order ID
+ * @returns {Promise<Object>} - Jersey order data or null
+ */
+async function getJerseyOrderFromGoogleSheets(orderId) {
+    try {
+        const sheets = await getGoogleSheetsClient();
+        
+        // Get all jersey order data
+        const response = await sheets.spreadsheets.values.get({
+            spreadsheetId: JERSEY_SPREADSHEET_ID,
+            range: `${JERSEY_SHEET_NAME}!A:P`, // Get all columns A to P
+        });
+
+        const rows = response.data.values || [];
+        console.log(`Searching for jersey order ID: ${orderId} in ${rows.length} rows`);
+
+        // Find jersey order by midtransOrderId (should be in column O, index 14)
+        for (let i = 1; i < rows.length; i++) { // Skip header row
+            const row = rows[i];
+            const rowOrderId = row[14]; // Column O (0-indexed = 14) - Midtrans Order ID
+            
+            if (rowOrderId) {
+                // First try exact match
+                if (rowOrderId === orderId) {
+                    console.log(`Found exact jersey order match at row ${i + 1}:`, row);
+                    
+                    return {
+                        name: row[0] || '', // Column A - Nama
+                        email: row[1] || '', // Column B - Email
+                        phone: row[2] || '', // Column C - No. Handphone
+                        address: row[3] || '', // Column D - Alamat
+                        rtRw: row[4] || '', // Column E - RW/RW
+                        district: row[5] || '', // Column F - Kelurahan/Kecamatan
+                        city: row[6] || '', // Column G - Kota
+                        province: row[7] || '', // Column H - Provinsi
+                        postcode: row[8] || '', // Column I - Kode Pos
+                        jerseySize: row[9] || '', // Column J - Ukuran Jersey
+                        quantity: parseInt(row[10]) || 1, // Column K - Quantity
+                        fixedPrice: parseFloat(row[11]) || 0, // Column L - Fixed Price
+                        totalAmount: parseFloat(row[12]) || 0, // Column M - Total Amount
+                        paymentLink: row[13] || '', // Column N - Payment Link
+                        orderId: row[14] || '', // Column O - Midtrans Order ID
+                        paidStatus: row[15] || 'unpaid' // Column P - Paid Status
+                    };
+                }
+                
+                // Try partial matches for jersey orders too
+                if (orderId.startsWith(rowOrderId) || rowOrderId.startsWith(orderId)) {
+                    console.log(`Found partial jersey order match at row ${i + 1}: stored="${rowOrderId}", received="${orderId}"`);
+                    
+                    return {
+                        name: row[0] || '',
+                        email: row[1] || '',
+                        phone: row[2] || '',
+                        address: row[3] || '',
+                        rtRw: row[4] || '',
+                        district: row[5] || '',
+                        city: row[6] || '',
+                        province: row[7] || '',
+                        postcode: row[8] || '',
+                        jerseySize: row[9] || '',
+                        quantity: parseInt(row[10]) || 1,
+                        fixedPrice: parseFloat(row[11]) || 0,
+                        totalAmount: parseFloat(row[12]) || 0,
+                        paymentLink: row[13] || '',
+                        orderId: row[14] || '',
+                        paidStatus: row[15] || 'unpaid',
+                        rowIndex: i + 1 // Store row index for updates
+                    };
+                }
+            }
+        }
+
+        console.log(`No jersey order found for order ID: ${orderId}`);
+        return null;
+
+    } catch (error) {
+        console.error('Error fetching jersey order from Google Sheets:', error.message);
+        return null;
+    }
+}
+
+/**
+ * Updates jersey order status in Google Sheets
+ * @param {string} orderId - Midtrans order ID
+ * @param {string} newStatus - New paid status ('paid' or 'unpaid')
+ * @returns {Promise<Object>} - Update result
+ */
+async function updateJerseyOrderInGoogleSheets(orderId, newStatus) {
+    try {
+        console.log('Updating Jersey Google Sheets for order:', orderId, 'status:', newStatus);
+        
+        const sheets = await getGoogleSheetsClient();
+        
+        // Get all data to find the row with matching order ID
+        const response = await sheets.spreadsheets.values.get({
+            spreadsheetId: JERSEY_SPREADSHEET_ID,
+            range: `${JERSEY_SHEET_NAME}!A:P`,
+        });
+
+        const rows = response.data.values || [];
+        let targetRowIndex = -1;
+
+        // Find the row with matching order ID
+        for (let i = 1; i < rows.length; i++) { // Skip header row
+            const midtransOrderId = rows[i][14]; // Column O (index 14) - Midtrans Order ID
+            
+            if (midtransOrderId && (midtransOrderId === orderId || orderId.startsWith(midtransOrderId) || midtransOrderId.startsWith(orderId))) {
+                targetRowIndex = i + 1; // Google Sheets is 1-indexed
+                console.log(`✅ Found jersey order to update at row ${targetRowIndex}`);
+                break;
+            }
+        }
+
+        if (targetRowIndex === -1) {
+            console.log('❌ Jersey order ID not found in sheet:', orderId);
+            return { success: false, message: 'Jersey order ID not found in sheet' };
+        }
+
+        // Update paid status in column P
+        const updateResult = await sheets.spreadsheets.values.update({
+            spreadsheetId: JERSEY_SPREADSHEET_ID,
+            range: `${JERSEY_SHEET_NAME}!P${targetRowIndex}`, // Paid Status column (column P)
+            valueInputOption: 'USER_ENTERED',
+            resource: {
+                values: [[newStatus]]
+            }
+        });
+
+        console.log(`✅ Successfully updated jersey order status: ${orderId} -> ${newStatus}`);
+        return { 
+            success: true, 
+            message: 'Jersey order status updated successfully',
+            updatedRow: targetRowIndex,
+            newStatus: newStatus
+        };
+
+    } catch (error) {
+        console.error('Error updating jersey order in Google Sheets:', error.message);
+        return { 
+            success: false, 
+            message: 'Failed to update jersey order status',
+            error: error.message
+        };
     }
 }
 
@@ -640,41 +864,125 @@ export async function POST(request) {
         }
 
         if (shouldUpdateStatus) {
-            // Update local registration file
-            const localResult = await updateLocalRegistration(order_id, transaction_status, payment_type);
-            console.log('Local update result:', localResult);
+            // First, try to find in registration database
+            let isRegistrationOrder = false;
+            let isJerseyOrder = false;
+            let registrationData = null;
+            let jerseyOrderData = null;
 
-            // Update Google Sheets
-            const sheetsResult = await updateRegistrationInGoogleSheets(order_id, transaction_status, payment_type);
-            console.log('Sheets update result:', sheetsResult);
+            // Check if this is a registration order
+            console.log('🔍 Checking registration database...');
+            const registrationCheck = await getRegistrationFromGoogleSheets(order_id);
+            if (registrationCheck) {
+                isRegistrationOrder = true;
+                registrationData = registrationCheck;
+                console.log('✅ Found in registration database');
+            } else {
+                console.log('❌ Not found in registration database');
+            }
 
-            // Call n8n webhook for successful payments
+            // Check if this is a jersey order
+            console.log('🔍 Checking jersey database...');
+            const jerseyCheck = await getJerseyOrderFromGoogleSheets(order_id);
+            if (jerseyCheck) {
+                isJerseyOrder = true;
+                jerseyOrderData = jerseyCheck;
+                console.log('✅ Found in jersey database');
+            } else {
+                console.log('❌ Not found in jersey database');
+            }
+
+            // Process based on what type of order this is
+            let localResult = { success: false };
+            let sheetsResult = { success: false };
+            let jerseyResult = { success: false };
+
+            if (isRegistrationOrder) {
+                console.log('📝 Processing as registration order...');
+                // Update local registration file
+                localResult = await updateLocalRegistration(order_id, transaction_status, payment_type);
+                console.log('Local registration update result:', localResult);
+
+                // Update registration Google Sheets
+                sheetsResult = await updateRegistrationInGoogleSheets(order_id, transaction_status, payment_type);
+                console.log('Registration sheets update result:', sheetsResult);
+            }
+
+            if (isJerseyOrder) {
+                console.log('👕 Processing as jersey order...');
+                // Determine new paid status based on transaction status
+                let newPaidStatus = 'unpaid';
+                
+                switch (transaction_status) {
+                    case 'capture':
+                    case 'settlement':
+                        newPaidStatus = 'paid';
+                        break;
+                    case 'pending':
+                    case 'expire':
+                    case 'cancel':
+                    case 'deny':
+                        newPaidStatus = 'unpaid';
+                        break;
+                    default:
+                        newPaidStatus = 'unpaid';
+                        break;
+                }
+
+                // Update jersey order status
+                jerseyResult = await updateJerseyOrderInGoogleSheets(order_id, newPaidStatus);
+                console.log('Jersey order update result:', jerseyResult);
+            }
+
+            // If no order found in either database
+            if (!isRegistrationOrder && !isJerseyOrder) {
+                console.warn('⚠️ Order ID not found in any database:', order_id);
+            }
+
+            // Call appropriate n8n webhook for successful payments
             if ((transaction_status === 'capture' || transaction_status === 'settlement') && 
-                (localResult.success || sheetsResult.success)) {
+                (localResult.success || sheetsResult.success || jerseyResult.success)) {
                 
-                console.log('🎉 Payment successful, calling n8n webhook...');
+                console.log('🎉 Payment successful, calling appropriate n8n webhook...');
                 
-                // Get registration data from Google Sheets
-                const registrationData = await getRegistrationFromGoogleSheets(order_id);
-                console.log('Registration data for n8n:', registrationData ? 'Found' : 'Not found');
+                // Call registration webhook if this is a registration payment
+                if (isRegistrationOrder && registrationData) {
+                    console.log('📝 Calling registration n8n webhook...');
+                    const registrationN8nResult = await sendRegistrationSuccessToN8n(notification, registrationData);
+                    console.log('Registration n8n webhook result:', registrationN8nResult);
+                    
+                    if (registrationN8nResult.success) {
+                        console.log('✅ Registration n8n notification sent successfully');
+                    } else {
+                        console.warn('⚠️ Registration n8n notification failed, but continuing...');
+                    }
+                }
                 
-                const n8nResult = await sendPaymentSuccessToN8n(notification, registrationData);
-                console.log('n8n webhook result:', n8nResult);
-                
-                if (n8nResult.success) {
-                    console.log('✅ n8n notification sent successfully');
-                } else {
-                    console.warn('⚠️ n8n notification failed, but continuing...');
+                // Call jersey webhook if this is a jersey payment
+                if (isJerseyOrder && jerseyOrderData) {
+                    console.log('👕 Calling jersey n8n webhook...');
+                    const jerseyN8nResult = await sendJerseySuccessToN8n(notification, jerseyOrderData);
+                    console.log('Jersey n8n webhook result:', jerseyN8nResult);
+                    
+                    if (jerseyN8nResult.success) {
+                        console.log('✅ Jersey n8n notification sent successfully');
+                    } else {
+                        console.warn('⚠️ Jersey n8n notification failed, but continuing...');
+                    }
                 }
             }
 
             // Log the results
-            if (localResult.success && sheetsResult.success) {
-                console.log('✅ Both local and Google Sheets updated successfully');
+            const anySuccess = localResult.success || sheetsResult.success || jerseyResult.success;
+            if (anySuccess) {
+                console.log('✅ Order processed successfully:', {
+                    registration: { local: localResult.success, sheets: sheetsResult.success },
+                    jersey: jerseyResult.success
+                });
             } else {
-                console.warn('⚠️ Partial update completed:', {
-                    local: localResult.success,
-                    sheets: sheetsResult.success
+                console.warn('⚠️ No successful updates:', {
+                    registration: { local: localResult.success, sheets: sheetsResult.success },
+                    jersey: jerseyResult.success
                 });
             }
         }

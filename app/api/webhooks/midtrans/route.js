@@ -225,121 +225,88 @@ async function getRegistrationFromGoogleSheets(orderId) {
             console.log('=== END DEBUGGING ===');
         }
 
-        // Find registration by midtransOrderId (should be in column AB, index 27)
+        // Find registration by midtransOrderId (column AB, index 27) or payment link (column AA, index 26)
         for (let i = 1; i < rows.length; i++) { // Skip header row
             const row = rows[i];
-            const rowOrderId = row[27]; // Column AB (0-indexed = 27) - midtransOrderId
-            
-            if (rowOrderId) {
-                // First try exact match
-                if (rowOrderId === orderId) {
-                    console.log(`Found exact match at row ${i + 1}:`, row);
-                    
-                    return {
-                        id: row[1] || '', // Column B - Registration ID
-                        name: row[2] || '', // Column C - Name
-                        email: row[3] || '', // Column D - Email  
-                        phone: row[4] || '', // Column E - Phone
-                        stravaName: row[5] || '', // Column F - Strava Name
-                        packageType: row[6] || 'basic', // Column G - Package Type
-                        jerseySize: row[7] || '', // Column H - Jersey Size
-                        gender: row[8] || '', // Column I - Gender
-                        completeAddress: row[9] || '', // Column J - Complete Address
-                        simpleAddress: row[10] || '', // Column K - Simple Address
-                        fullAddress: {
-                            street: row[11] || '', // Column L - Full Address Street
-                            rtRw: row[12] || '', // Column M - Full Address RT/RW
-                            district: row[13] || '', // Column N - Full Address District
-                            city: row[14] || '', // Column O - Full Address City
-                            province: row[15] || '', // Column P - Full Address Province
-                            postcode: row[16] || '' // Column Q - Full Address Postcode
-                        },
-                        baseAmount: parseFloat(row[17]) || 100000, // Column R - Base Amount
-                        fixedDonation: parseFloat(row[18]) || 0, // Column S - Fixed Donation
-                        jerseyPrice: parseFloat(row[19]) || 0, // Column T - Jersey Price
-                        additionalDonation: parseFloat(row[20]) || 0, // Column U - Additional Donation
-                        registrationDate: row[21] || '', // Column V - Registration Date
-                        status: row[22] || 'pending', // Column W - Status
-                        paymentStatus: row[23] || 'pending', // Column X - Payment Status
-                        totalAmount: parseFloat(row[24]) || 100000, // Column Y - Total Amount
-                        donationDate: row[25] || '', // Column Z - Donation Date
-                        paymentLink: row[26] || '', // Column AA - Payment Link
-                        orderId: row[27] || '' // Column AB - Midtrans Order ID
-                    };
-                }
-                
-                // Then try partial match - check if the received order ID starts with the stored order ID
-                if (orderId.startsWith(rowOrderId)) {
-                    console.log(`Found partial match at row ${i + 1}: stored="${rowOrderId}", received="${orderId}"`);
-                    
-                    return {
-                        id: row[1] || '', // Column B - Registration ID
-                        name: row[2] || '', // Column C - Name
-                        email: row[3] || '', // Column D - Email  
-                        phone: row[4] || '', // Column E - Phone
-                        stravaName: row[5] || '', // Column F - Strava Name
-                        packageType: row[6] || 'basic', // Column G - Package Type
-                        jerseySize: row[7] || '', // Column H - Jersey Size
-                        gender: row[8] || '', // Column I - Gender
-                        completeAddress: row[9] || '', // Column J - Complete Address
-                        simpleAddress: row[10] || '', // Column K - Simple Address
-                        fullAddress: {
-                            street: row[11] || '', // Column L - Full Address Street
-                            rtRw: row[12] || '', // Column M - Full Address RT/RW
-                            district: row[13] || '', // Column N - Full Address District
-                            city: row[14] || '', // Column O - Full Address City
-                            province: row[15] || '', // Column P - Full Address Province
-                            postcode: row[16] || '' // Column Q - Full Address Postcode
-                        },
-                        baseAmount: parseFloat(row[17]) || 100000, // Column R - Base Amount
-                        fixedDonation: parseFloat(row[18]) || 0, // Column S - Fixed Donation
-                        jerseyPrice: parseFloat(row[19]) || 0, // Column T - Jersey Price
-                        additionalDonation: parseFloat(row[20]) || 0, // Column U - Additional Donation
-                        registrationDate: row[21] || '', // Column V - Registration Date
-                        status: row[22] || 'pending', // Column W - Status
-                        paymentStatus: row[23] || 'pending', // Column X - Payment Status
-                        totalAmount: parseFloat(row[24]) || 100000, // Column Y - Total Amount
-                        donationDate: row[25] || '', // Column Z - Donation Date
-                        paymentLink: row[26] || '', // Column AA - Payment Link
-                        orderId: row[27] || '' // Column AB - Midtrans Order ID
-                    };
-                }
-                
-                // Also try reverse match - check if stored order ID starts with received order ID
-                if (rowOrderId.startsWith(orderId)) {
-                    console.log(`Found reverse match at row ${i + 1}: stored="${rowOrderId}", received="${orderId}"`);
-                    
-                    return {
-                        id: row[1] || '', // Column B - Registration ID
-                        name: row[2] || '', // Column C - Name
-                        email: row[3] || '', // Column D - Email  
-                        phone: row[4] || '', // Column E - Phone
-                        stravaName: row[5] || '', // Column F - Strava Name
-                        packageType: row[6] || 'basic', // Column G - Package Type
-                        jerseySize: row[7] || '', // Column H - Jersey Size
-                        gender: row[8] || '', // Column I - Gender
-                        completeAddress: row[9] || '', // Column J - Complete Address
-                        simpleAddress: row[10] || '', // Column K - Simple Address
-                        fullAddress: {
-                            street: row[11] || '', // Column L - Full Address Street
-                            rtRw: row[12] || '', // Column M - Full Address RT/RW
-                            district: row[13] || '', // Column N - Full Address District
-                            city: row[14] || '', // Column O - Full Address City
-                            province: row[15] || '', // Column P - Full Address Province
-                            postcode: row[16] || '' // Column Q - Full Address Postcode
-                        },
-                        baseAmount: parseFloat(row[17]) || 100000, // Column R - Base Amount
-                        fixedDonation: parseFloat(row[18]) || 0, // Column S - Fixed Donation
-                        jerseyPrice: parseFloat(row[19]) || 0, // Column T - Jersey Price
-                        additionalDonation: parseFloat(row[20]) || 0, // Column U - Additional Donation
-                        registrationDate: row[21] || '', // Column V - Registration Date
-                        status: row[22] || 'pending', // Column W - Status
-                        paymentStatus: row[23] || 'pending', // Column X - Payment Status
-                        totalAmount: parseFloat(row[24]) || 100000, // Column Y - Total Amount
-                        donationDate: row[25] || '', // Column Z - Donation Date
-                        paymentLink: row[26] || '', // Column AA - Payment Link
-                        orderId: row[27] || '' // Column AB - Midtrans Order ID
-                    };
+            const rowOrderId = row[27] || ''; // Column AB (0-indexed = 27) - midtransOrderId
+            const rowPaymentLink = row[26] || ''; // Column AA (0-indexed = 26) - payment link or link id
+
+            // Helper to build return object for this row
+            const buildRegistrationObject = (matchedBy) => ({
+                id: row[1] || '', // Column B - Registration ID
+                name: row[2] || '', // Column C - Name
+                email: row[3] || '', // Column D - Email  
+                phone: row[4] || '', // Column E - Phone
+                stravaName: row[5] || '', // Column F - Strava Name
+                packageType: row[6] || 'basic', // Column G - Package Type
+                jerseySize: row[7] || '', // Column H - Jersey Size
+                gender: row[8] || '', // Column I - Gender
+                completeAddress: row[9] || '', // Column J - Complete Address
+                simpleAddress: row[10] || '', // Column K - Simple Address
+                fullAddress: {
+                    street: row[11] || '', // Column L - Full Address Street
+                    rtRw: row[12] || '', // Column M - Full Address RT/RW
+                    district: row[13] || '', // Column N - Full Address District
+                    city: row[14] || '', // Column O - Full Address City
+                    province: row[15] || '', // Column P - Full Address Province
+                    postcode: row[16] || '' // Column Q - Full Address Postcode
+                },
+                baseAmount: parseFloat(row[17]) || 100000, // Column R - Base Amount
+                fixedDonation: parseFloat(row[18]) || 0, // Column S - Fixed Donation
+                jerseyPrice: parseFloat(row[19]) || 0, // Column T - Jersey Price
+                additionalDonation: parseFloat(row[20]) || 0, // Column U - Additional Donation
+                registrationDate: row[21] || '', // Column V - Registration Date
+                status: row[22] || 'pending', // Column W - Status
+                paymentStatus: row[23] || 'pending', // Column X - Payment Status
+                totalAmount: parseFloat(row[24]) || 100000, // Column Y - Total Amount
+                donationDate: row[25] || '', // Column Z - Donation Date
+                paymentLink: rowPaymentLink, // Column AA - Payment Link
+                orderId: rowOrderId, // Column AB - Midtrans Order ID
+                matchedBy
+            });
+
+            // Exact matches first (check both stored orderId and payment link)
+            if (rowOrderId && rowOrderId === orderId) {
+                console.log(`Found exact match at row ${i + 1} by orderId:`, row);
+                return buildRegistrationObject('orderId');
+            }
+
+            if (rowPaymentLink && rowPaymentLink === orderId) {
+                console.log(`Found exact match at row ${i + 1} by paymentLink:`, row);
+                return buildRegistrationObject('paymentLink');
+            }
+
+            // Partial matches - received starts with stored (handles Midtrans appended timestamps)
+            if (rowOrderId && orderId.startsWith(rowOrderId)) {
+                console.log(`Found partial match at row ${i + 1} by orderId: stored="${rowOrderId}", received="${orderId}"`);
+                return buildRegistrationObject('orderId-partial');
+            }
+
+            if (rowPaymentLink && orderId.startsWith(rowPaymentLink)) {
+                console.log(`Found partial match at row ${i + 1} by paymentLink: stored="${rowPaymentLink}", received="${orderId}"`);
+                return buildRegistrationObject('paymentLink-partial');
+            }
+
+            // Reverse partial matches - stored starts with received
+            if (rowOrderId && rowOrderId.startsWith(orderId)) {
+                console.log(`Found reverse match at row ${i + 1} by orderId: stored="${rowOrderId}", received="${orderId}"`);
+                return buildRegistrationObject('orderId-reverse');
+            }
+
+            if (rowPaymentLink && rowPaymentLink.startsWith(orderId)) {
+                console.log(`Found reverse match at row ${i + 1} by paymentLink: stored="${rowPaymentLink}", received="${orderId}"`);
+                return buildRegistrationObject('paymentLink-reverse');
+            }
+
+            // Additional pattern-based matching on base parts
+            const receivedParts = orderId.split('-');
+            const storedParts = rowOrderId.split('-');
+            if (receivedParts.length >= 3 && storedParts.length >= 3) {
+                const receivedBase = receivedParts.slice(0, 3).join('-');
+                const storedBase = storedParts.slice(0, 3).join('-');
+                if (receivedBase === storedBase) {
+                    console.log(`Found base pattern match at row ${i + 1} by orderId: receivedBase="${receivedBase}", storedBase="${storedBase}"`);
+                    return buildRegistrationObject('orderId-base');
                 }
             }
         }
@@ -371,60 +338,53 @@ async function getJerseyOrderFromGoogleSheets(orderId) {
         const rows = response.data.values || [];
         console.log(`Searching for jersey order ID: ${orderId} in ${rows.length} rows`);
 
-        // Find jersey order by midtransOrderId (should be in column O, index 14)
+        // Find jersey order by midtransOrderId (column O, index 14) or payment link (column N, index 13)
         for (let i = 1; i < rows.length; i++) { // Skip header row
             const row = rows[i];
-            const rowOrderId = row[14]; // Column O (0-indexed = 14) - Midtrans Order ID
-            
-            if (rowOrderId) {
-                // First try exact match
-                if (rowOrderId === orderId) {
-                    console.log(`Found exact jersey order match at row ${i + 1}:`, row);
-                    
-                    return {
-                        name: row[0] || '', // Column A - Nama
-                        email: row[1] || '', // Column B - Email
-                        phone: row[2] || '', // Column C - No. Handphone
-                        address: row[3] || '', // Column D - Alamat
-                        rtRw: row[4] || '', // Column E - RW/RW
-                        district: row[5] || '', // Column F - Kelurahan/Kecamatan
-                        city: row[6] || '', // Column G - Kota
-                        province: row[7] || '', // Column H - Provinsi
-                        postcode: row[8] || '', // Column I - Kode Pos
-                        jerseySize: row[9] || '', // Column J - Ukuran Jersey
-                        quantity: parseInt(row[10]) || 1, // Column K - Quantity
-                        fixedPrice: parseFloat(row[11]) || 0, // Column L - Fixed Price
-                        totalAmount: parseFloat(row[12]) || 0, // Column M - Total Amount
-                        paymentLink: row[13] || '', // Column N - Payment Link
-                        orderId: row[14] || '', // Column O - Midtrans Order ID
-                        paidStatus: row[15] || 'unpaid' // Column P - Paid Status
-                    };
-                }
-                
-                // Try partial matches for jersey orders too
-                if (orderId.startsWith(rowOrderId) || rowOrderId.startsWith(orderId)) {
-                    console.log(`Found partial jersey order match at row ${i + 1}: stored="${rowOrderId}", received="${orderId}"`);
-                    
-                    return {
-                        name: row[0] || '',
-                        email: row[1] || '',
-                        phone: row[2] || '',
-                        address: row[3] || '',
-                        rtRw: row[4] || '',
-                        district: row[5] || '',
-                        city: row[6] || '',
-                        province: row[7] || '',
-                        postcode: row[8] || '',
-                        jerseySize: row[9] || '',
-                        quantity: parseInt(row[10]) || 1,
-                        fixedPrice: parseFloat(row[11]) || 0,
-                        totalAmount: parseFloat(row[12]) || 0,
-                        paymentLink: row[13] || '',
-                        orderId: row[14] || '',
-                        paidStatus: row[15] || 'unpaid',
-                        rowIndex: i + 1 // Store row index for updates
-                    };
-                }
+            const rowOrderId = row[14] || ''; // Column O (0-indexed = 14) - Midtrans Order ID
+            const rowPaymentLink = row[13] || ''; // Column N (0-indexed = 13) - Payment Link
+
+            const buildJerseyObject = (matchedBy) => ({
+                name: row[0] || '', // Column A - Nama
+                email: row[1] || '', // Column B - Email
+                phone: row[2] || '', // Column C - No. Handphone
+                address: row[3] || '', // Column D - Alamat
+                rtRw: row[4] || '', // Column E - RW/RW
+                district: row[5] || '', // Column F - Kelurahan/Kecamatan
+                city: row[6] || '', // Column G - Kota
+                province: row[7] || '', // Column H - Provinsi
+                postcode: row[8] || '', // Column I - Kode Pos
+                jerseySize: row[9] || '', // Column J - Ukuran Jersey
+                quantity: parseInt(row[10]) || 1, // Column K - Quantity
+                fixedPrice: parseFloat(row[11]) || 0, // Column L - Fixed Price
+                totalAmount: parseFloat(row[12]) || 0, // Column M - Total Amount
+                paymentLink: rowPaymentLink, // Column N - Payment Link
+                orderId: rowOrderId, // Column O - Midtrans Order ID
+                paidStatus: row[15] || 'unpaid', // Column P - Paid Status
+                rowIndex: i + 1,
+                matchedBy
+            });
+
+            // Exact matches
+            if (rowOrderId && rowOrderId === orderId) {
+                console.log(`Found exact jersey order match at row ${i + 1} by orderId:`, row);
+                return buildJerseyObject('orderId');
+            }
+
+            if (rowPaymentLink && rowPaymentLink === orderId) {
+                console.log(`Found exact jersey order match at row ${i + 1} by paymentLink:`, row);
+                return buildJerseyObject('paymentLink');
+            }
+
+            // Partial or reverse partial matches
+            if (rowOrderId && (orderId.startsWith(rowOrderId) || rowOrderId.startsWith(orderId))) {
+                console.log(`Found partial jersey order match at row ${i + 1} by orderId: stored="${rowOrderId}", received="${orderId}"`);
+                return buildJerseyObject('orderId-partial');
+            }
+
+            if (rowPaymentLink && (orderId.startsWith(rowPaymentLink) || rowPaymentLink.startsWith(orderId))) {
+                console.log(`Found partial jersey order match at row ${i + 1} by paymentLink: stored="${rowPaymentLink}", received="${orderId}"`);
+                return buildJerseyObject('paymentLink-partial');
             }
         }
 
@@ -458,13 +418,20 @@ async function updateJerseyOrderInGoogleSheets(orderId, newStatus) {
         const rows = response.data.values || [];
         let targetRowIndex = -1;
 
-        // Find the row with matching order ID
+        // Find the row with matching order ID or payment link
         for (let i = 1; i < rows.length; i++) { // Skip header row
-            const midtransOrderId = rows[i][14]; // Column O (index 14) - Midtrans Order ID
-            
+            const midtransOrderId = rows[i][14] || ''; // Column O (index 14) - Midtrans Order ID
+            const paymentLink = rows[i][13] || ''; // Column N (index 13) - Payment Link
+
             if (midtransOrderId && (midtransOrderId === orderId || orderId.startsWith(midtransOrderId) || midtransOrderId.startsWith(orderId))) {
                 targetRowIndex = i + 1; // Google Sheets is 1-indexed
-                console.log(`✅ Found jersey order to update at row ${targetRowIndex}`);
+                console.log(`✅ Found jersey order to update at row ${targetRowIndex} by orderId`);
+                break;
+            }
+
+            if (paymentLink && (paymentLink === orderId || orderId.startsWith(paymentLink) || paymentLink.startsWith(orderId))) {
+                targetRowIndex = i + 1;
+                console.log(`✅ Found jersey order to update at row ${targetRowIndex} by paymentLink`);
                 break;
             }
         }
@@ -535,51 +502,67 @@ async function updateRegistrationInGoogleSheets(orderId, transactionStatus, paym
         console.log(`Searching for order ID: "${orderId}" in ${rows.length - 1} rows`);
         
         for (let i = 1; i < rows.length; i++) { // Skip header row
-            const midtransOrderId = rows[i][27]; // Column AB (index 27) - Midtrans Order ID
-            
+            const midtransOrderId = rows[i][27] || ''; // Column AB (index 27) - Midtrans Order ID
+            const paymentLink = rows[i][26] || ''; // Column AA (index 26) - Payment Link
+
+            console.log(`Row ${i}: Comparing storedOrderId="${midtransOrderId}" storedPaymentLink="${paymentLink}" with received="${orderId}"`);
+
+            // Exact matches first
+            if (midtransOrderId && midtransOrderId === orderId) {
+                targetRowIndex = i + 1;
+                foundOrderId = midtransOrderId;
+                console.log(`✅ Found exact match at row ${targetRowIndex} by orderId`);
+                break;
+            }
+
+            if (paymentLink && paymentLink === orderId) {
+                targetRowIndex = i + 1;
+                foundOrderId = paymentLink;
+                console.log(`✅ Found exact match at row ${targetRowIndex} by paymentLink`);
+                break;
+            }
+
+            // Partial matches (received starts with stored)
+            if (midtransOrderId && orderId.startsWith(midtransOrderId)) {
+                targetRowIndex = i + 1;
+                foundOrderId = midtransOrderId;
+                console.log(`✅ Found partial match (received starts with stored) at row ${targetRowIndex} by orderId: stored="${midtransOrderId}", received="${orderId}"`);
+                break;
+            }
+
+            if (paymentLink && orderId.startsWith(paymentLink)) {
+                targetRowIndex = i + 1;
+                foundOrderId = paymentLink;
+                console.log(`✅ Found partial match (received starts with stored) at row ${targetRowIndex} by paymentLink: stored="${paymentLink}", received="${orderId}"`);
+                break;
+            }
+
+            // Reverse matches (stored starts with received)
+            if (midtransOrderId && midtransOrderId.startsWith(orderId)) {
+                targetRowIndex = i + 1;
+                foundOrderId = midtransOrderId;
+                console.log(`✅ Found reverse match (stored starts with received) at row ${targetRowIndex} by orderId: stored="${midtransOrderId}", received="${orderId}"`);
+                break;
+            }
+
+            if (paymentLink && paymentLink.startsWith(orderId)) {
+                targetRowIndex = i + 1;
+                foundOrderId = paymentLink;
+                console.log(`✅ Found reverse match (stored starts with received) at row ${targetRowIndex} by paymentLink: stored="${paymentLink}", received="${orderId}"`);
+                break;
+            }
+
+            // Additional base-pattern matching for midtransOrderId
             if (midtransOrderId) {
-                console.log(`Row ${i}: Comparing stored="${midtransOrderId}" with received="${orderId}"`);
-                
-                // First try exact match
-                if (midtransOrderId === orderId) {
-                    targetRowIndex = i + 1; // Google Sheets is 1-indexed
-                    foundOrderId = midtransOrderId;
-                    console.log(`✅ Found exact match at row ${targetRowIndex}`);
-                    break;
-                }
-                
-                // Then try partial match - check if the received order ID starts with the stored order ID
-                // This handles cases where Midtrans appends additional timestamps
-                if (orderId.startsWith(midtransOrderId)) {
-                    targetRowIndex = i + 1;
-                    foundOrderId = midtransOrderId;
-                    console.log(`✅ Found partial match (received starts with stored) at row ${targetRowIndex}: stored="${midtransOrderId}", received="${orderId}"`);
-                    break;
-                }
-                
-                // Also try reverse match - check if stored order ID starts with received order ID
-                // This handles cases where the stored ID might have been truncated
-                if (midtransOrderId.startsWith(orderId)) {
-                    targetRowIndex = i + 1;
-                    foundOrderId = midtransOrderId;
-                    console.log(`✅ Found reverse match (stored starts with received) at row ${targetRowIndex}: stored="${midtransOrderId}", received="${orderId}"`);
-                    break;
-                }
-                
-                // Additional check: if both IDs contain similar patterns, try substring matching
-                // Extract the base pattern (e.g., "WRP-1757304284049-1757304284813" from longer IDs)
                 const receivedParts = orderId.split('-');
                 const storedParts = midtransOrderId.split('-');
-                
                 if (receivedParts.length >= 3 && storedParts.length >= 3) {
-                    // Compare first 3 parts: WRP-timestamp1-timestamp2
                     const receivedBase = receivedParts.slice(0, 3).join('-');
                     const storedBase = storedParts.slice(0, 3).join('-');
-                    
                     if (receivedBase === storedBase) {
                         targetRowIndex = i + 1;
                         foundOrderId = midtransOrderId;
-                        console.log(`✅ Found base pattern match at row ${targetRowIndex}: receivedBase="${receivedBase}", storedBase="${storedBase}"`);
+                        console.log(`✅ Found base pattern match at row ${targetRowIndex} by orderId: receivedBase="${receivedBase}", storedBase="${storedBase}"`);
                         break;
                     }
                 }
@@ -858,9 +841,14 @@ export async function POST(request) {
         let shouldUpdateStatus = true;
         
         // Check for fraud
-        if (fraud_status === 'challenge' || fraud_status === 'deny') {
-            console.log('Transaction flagged for fraud:', fraud_status);
+        // 'challenge' means manual review required -> skip automatic updates
+        // 'deny' means the transaction was denied by Midtrans; treat as a failed payment and process updates
+        if (fraud_status === 'challenge') {
+            console.log('Transaction flagged for review (challenge): skipping automatic updates:', fraud_status);
             shouldUpdateStatus = false;
+        } else if (fraud_status === 'deny') {
+            console.log('Transaction denied by Midtrans (deny). Will process as failed payment and update records accordingly.');
+            // Leave shouldUpdateStatus true so the normal failure handling runs
         }
 
         if (shouldUpdateStatus) {

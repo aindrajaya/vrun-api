@@ -18,6 +18,7 @@ export default function SubmitPage() {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [submitStatus, setSubmitStatus] = useState('');
   const [submitData, setSubmitData] = useState(null);
+  const [submitError, setSubmitError] = useState('');
 
   const handleInputChange = (e) => {
     const { name, value } = e.target;
@@ -25,6 +26,53 @@ export default function SubmitPage() {
       ...prev,
       [name]: value
     }));
+  };
+
+  // Parse durations like H:MM:SS, MM:SS or HH:MM:SS and normalize to HH:MM:SS
+  function normalizeDuration(value) {
+    if (!value) return '';
+    const parts = value.trim().split(':').map(p => p.trim());
+    // Accept MM:SS or H:MM:SS or HH:MM:SS
+    if (parts.length === 2) {
+      // MM:SS => 00:MM:SS
+      const [m, s] = parts;
+      const mm = String(Math.max(0, parseInt(m || '0', 10))).padStart(2, '0');
+      const ss = String(Math.max(0, parseInt(s || '0', 10))).padStart(2, '0');
+      return `00:${mm}:${ss}`;
+    }
+    if (parts.length === 3) {
+      const [h, m, s] = parts;
+      const hh = String(Math.max(0, parseInt(h || '0', 10))).padStart(2, '0');
+      const mm = String(Math.max(0, parseInt(m || '0', 10))).padStart(2, '0');
+      const ss = String(Math.max(0, parseInt(s || '0', 10))).padStart(2, '0');
+      return `${hh}:${mm}:${ss}`;
+    }
+    // If plain seconds were entered, treat as seconds
+    if (/^\d+$/.test(value.trim())) {
+      const total = parseInt(value.trim(), 10) || 0;
+      const hh = String(Math.floor(total / 3600)).padStart(2, '0');
+      const mm = String(Math.floor((total % 3600) / 60)).padStart(2, '0');
+      const ss = String(total % 60).padStart(2, '0');
+      return `${hh}:${mm}:${ss}`;
+    }
+    return value; // leave as-is to be validated later
+  }
+
+  const [durationError, setDurationError] = useState('');
+  const [emailError, setEmailError] = useState('');
+
+  const handleDurationBlur = (e) => {
+    const val = e.target.value;
+    const normalized = normalizeDuration(val);
+    // Validate normalized format HH:MM:SS
+    const durationRegex = /^[0-9]{2}:[0-9]{2}:[0-9]{2}$/;
+    if (!durationRegex.test(normalized)) {
+      setDurationError('Format durasi harus HH:MM:SS (contoh: 01:30:45)');
+      setFormData(prev => ({ ...prev, duration: val }));
+    } else {
+      setDurationError('');
+      setFormData(prev => ({ ...prev, duration: normalized }));
+    }
   };
 
   const handleFileChange = (e) => {
@@ -37,6 +85,11 @@ export default function SubmitPage() {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    // Block submit if client-side validation failed
+    if (durationError || emailError) {
+      setSubmitStatus('error');
+      return;
+    }
     setIsSubmitting(true);
     setSubmitStatus('');
 
@@ -58,6 +111,7 @@ export default function SubmitPage() {
       if (response.ok) {
         setSubmitStatus('success');
         setSubmitData(result);
+        setSubmitError('');
         setFormData({ 
           name: '', 
           email: '', 
@@ -69,13 +123,37 @@ export default function SubmitPage() {
         });
       } else {
         setSubmitStatus('error');
-        console.error('Submission failed:', result.error);
+        // Map specific backend messages to user-friendly Indonesian messages
+        let errMsg = result?.error || result?.message || 'Terjadi kesalahan. Silakan coba lagi.';
+        // Prioritize exact per-email submission limit cases
+        const emailLimitPatterns = [/has already submitted 4 times/i, /Anda telah menggunakan 4x/i, /Submission limit exceeded/i];
+        const stravaDuplicatePatterns = [/strava link/i, /activity has already been submitted/i, /duplicate/i, /already been submitted/i];
+
+        if (response.status === 429 || emailLimitPatterns.some(rx => rx.test(errMsg))) {
+          errMsg = 'Anda telah menggunakan 4x Kesempatan Submisi, terima kasih atas partisipasinya';
+        } else if (stravaDuplicatePatterns.some(rx => rx.test(errMsg))) {
+          errMsg = 'Strava link telah digunakan, mohon masukan Strava link yang lain';
+        }
+        setSubmitError(errMsg);
+        console.error('Submission failed:', errMsg);
       }
     } catch (error) {
-      setSubmitStatus('error');
-      console.error('Submission error:', error);
+  setSubmitStatus('error');
+  const message = error?.message || String(error) || 'Terjadi kesalahan. Silakan coba lagi.';
+  setSubmitError(message);
+  console.error('Submission error:', error);
     } finally {
       setIsSubmitting(false);
+    }
+  };
+
+  const handleEmailBlur = (e) => {
+    const val = e.target.value || '';
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(val)) {
+      setEmailError('Format email tidak valid');
+    } else {
+      setEmailError('');
     }
   };
 
@@ -179,7 +257,8 @@ export default function SubmitPage() {
 
                 {submitStatus === 'error' && (
                   <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-xl text-sm sm:text-base">
-                    Terjadi kesalahan. Silakan coba lagi.
+                    <div className="font-semibold mb-1">Terjadi kesalahan</div>
+                    <div className="text-xs">{submitError || 'Terjadi kesalahan. Silakan coba lagi.'}</div>
                   </div>
                 )}
 
@@ -203,9 +282,13 @@ export default function SubmitPage() {
                       placeholder="Email"
                       value={formData.email}
                       onChange={handleInputChange}
+                      onBlur={handleEmailBlur}
                       required
                       className="w-full px-4 sm:px-6 lg:px-8 py-1 sm:py-2 lg:py-4 text-base sm:text-lg lg:text-xl border-2 border-gray-200 rounded-full focus:ring-2 focus:ring-green-500 focus:border-green-500 outline-none transition-all duration-200 text-gray-900 placeholder-gray-500"
                     />
+                    {emailError && (
+                      <p className="text-xs text-red-600 px-4">{emailError}</p>
+                    )}
                   </div>
 
                   <div className="space-y-2">
@@ -256,6 +339,7 @@ export default function SubmitPage() {
                       placeholder="Durasi (contoh: 01:30:45)"
                       value={formData.duration}
                       onChange={handleInputChange}
+                      onBlur={handleDurationBlur}
                       required
                       pattern="[0-9]{2}:[0-9]{2}:[0-9]{2}"
                       className="w-full px-4 sm:px-6 lg:px-8 py-1 sm:py-2 lg:py-4 text-base sm:text-lg lg:text-xl border-2 border-gray-200 rounded-full focus:ring-2 focus:ring-green-500 focus:border-green-500 outline-none transition-all duration-200 text-gray-900 placeholder-gray-500"
@@ -263,6 +347,9 @@ export default function SubmitPage() {
                     <p className="text-xs sm:text-sm text-gray-500 px-4">
                       Format: HH:MM:SS (jam:menit:detik)
                     </p>
+                    {durationError && (
+                      <p className="text-xs text-red-600 px-4">{durationError}</p>
+                    )}
                   </div>
 
                   <div className="space-y-2">

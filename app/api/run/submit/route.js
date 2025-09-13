@@ -7,6 +7,8 @@ const SPREADSHEET_ID = process.env.GOOGLE_SHEET_ID || 'YOUR_SPREADSHEET_ID';
 // Use the requested sheet name for run submissions
 const SUBMISSIONS_SHEET_NAME = process.env.GOOGLE_SUBMISSIONS_SHEET_NAME || 'WRP_run_submissions';
 const SCOPES = ['https://www.googleapis.com/auth/spreadsheets'];
+// Name of the registrations sheet that contains registered emails (column D)
+const REGISTRATIONS_SHEET_NAME = process.env.GOOGLE_REGISTRATIONS_SHEET_NAME || 'WRP_Registrations';
 // Optional: folder ID to place uploaded proof images
 const DRIVE_UPLOAD_FOLDER_ID = process.env.GOOGLE_DRIVE_UPLOAD_FOLDER_ID || '1H7UPcajAMqSdHqSPpEUmBtSIOwTWuBjY';
 // Optional: Shared Drive (Team Drive) ID to use when uploading via service accounts.
@@ -117,6 +119,34 @@ async function checkDuplicateSubmission(email, stravaActivity) {
   } catch (error) {
     console.error('Error checking duplicate submission:', error);
     return { isStravaDuplicate: false, emailCount: 0 }; // If check fails, allow submission to proceed
+  }
+}
+
+/**
+ * Checks whether the submitted email exists in the registrations sheet (column D)
+ * @param {string} email
+ * @returns {Promise<boolean>} true if registered
+ */
+async function checkEmailRegistered(email) {
+  try {
+    const sheets = await getGoogleSheetsClient();
+    // Read column D (4th column) from registrations sheet
+    const response = await sheets.spreadsheets.values.get({
+      spreadsheetId: SPREADSHEET_ID,
+      range: `${REGISTRATIONS_SHEET_NAME}!D2:D1000`,
+    });
+
+    const rows = response.data.values || [];
+    const emailLower = String(email || '').toLowerCase();
+    for (let i = 0; i < rows.length; i++) {
+      const rowEmail = String(rows[i][0] || '').toLowerCase();
+      if (rowEmail && rowEmail === emailLower) return true;
+    }
+    return false;
+  } catch (err) {
+    console.error('Error checking registrations sheet for email:', err);
+    // If we can't check registrations, be conservative and reject to avoid abuse
+    return false;
   }
 }
 
@@ -330,9 +360,19 @@ export async function POST(request) {
 
     console.log('Validation passed, creating submission object...');
 
-    // Check for duplicates and enforce per-email submission limit
-    console.log('Checking for duplicate submission in Google Sheets...');
+    // Verify the email is registered and then check for duplicates and per-email limits
+    console.log('Verifying submitted email exists in registrations...');
     try {
+      const isRegistered = await checkEmailRegistered(email);
+      if (!isRegistered) {
+        console.log('Submitted email not found in registrations:', email);
+        return NextResponse.json(
+          { error: 'Email belum terdaftar, mohon menggunakan email yang gunakan saat pendaftaran' },
+          { status: 403 }
+        );
+      }
+
+      console.log('Checking for duplicate submission in Google Sheets...');
       const { isStravaDuplicate, emailCount } = await checkDuplicateSubmission(email, stravaActivity);
       if (isStravaDuplicate) {
         console.log('Duplicate Strava activity submission detected, returning error for', stravaActivity);

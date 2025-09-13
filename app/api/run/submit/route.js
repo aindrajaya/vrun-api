@@ -195,7 +195,8 @@ async function storeSubmissionInGoogleSheets(submissionData) {
     console.log('Storing submission in Google Sheets:', submissionData);
     
     // Prepare the data for Google Sheets format
-    // Columns: Date Submit, Nama Lengkap, Email, Handphone, Link Aktivitas Strava, Jarak (km), Durasi (HH:MM:SS), Foto
+    // Columns: Date Submit, Nama Lengkap, Email, Handphone, Link Aktivitas Strava, Jarak (km), Durasi (HH:MM:SS), Foto,
+    // Activity Name, Location, Activity Date, Pace, Authenticated, Auth Valid
     const columnOrder = [
       'timestamp', // Date Submit
       'name',
@@ -204,7 +205,13 @@ async function storeSubmissionInGoogleSheets(submissionData) {
       'stravaActivity',
       'distance',
       'duration',
-      'proofFileName'
+      'proofFileName',
+      'activity_name',
+      'location',
+      'activity_date',
+      'pace',
+      'authenticated',
+      'auth_valid'
     ];
 
     // Convert submission object to array based on column order
@@ -236,7 +243,13 @@ async function storeSubmissionInGoogleSheets(submissionData) {
           'Link Aktivitas Strava',
           'Jarak (km)',
           'Durasi (HH:MM:SS)',
-          'Foto'
+          'Foto',
+          'Activity Name',
+          'Location',
+          'Activity Date',
+          'Pace',
+          'Authenticated',
+          'Auth Valid'
         ];
 
         await sheets.spreadsheets.values.update({
@@ -296,17 +309,167 @@ export async function POST(request) {
     const email = formData.get('email');
     const phone = formData.get('phone');
     const stravaActivity = formData.get('stravaActivity');
-    const distance = formData.get('distance');
-    const duration = formData.get('duration');
+    let distance = formData.get('distance');
+    let duration = formData.get('duration');
     const proofFile = formData.get('proof');
 
-    // Validate required fields
-    if (!name || !email || !phone || !stravaActivity || !distance || !duration || !proofFile) {
+    // Validate required fields (distance/duration will be filled from Strava scrape)
+    if (!name || !email || !phone || !stravaActivity || !proofFile) {
       console.log('Validation failed: missing required fields');
       return NextResponse.json(
-        { error: 'All fields including proof file are required' },
+        { error: 'Required fields missing: name, email, phone, stravaActivity, and proof file are required' },
         { status: 400 }
       );
+    }
+
+    // Helper: parse distance string like "1.51 km" or "0.94 mi" into numeric kilometers
+    const parseDistanceString = (s) => {
+      if (!s) return null
+      const m = String(s).match(/([0-9]+(?:\.[0-9]+)?)\s*(km|mi)/i)
+      if (!m) return null
+      let val = parseFloat(m[1])
+      const unit = m[2].toLowerCase()
+      if (unit === 'mi') val = val * 1.60934
+      return Number(val.toFixed(3))
+    }
+
+    // Helper: normalize moving_time like "19:24" (mm:ss) or "1:19:24" to HH:MM:SS
+    const normalizeDuration = (t) => {
+      if (!t) return null
+      const s = String(t).trim()
+      const parts = s.split(':').map(p => Number(p))
+      if (parts.length === 3 && parts.every(p => !Number.isNaN(p))) {
+        return parts.map(n => String(n).padStart(2, '0')).join(':')
+      }
+      if (parts.length === 2 && parts.every(p => !Number.isNaN(p))) {
+        // mm:ss -> 00:mm:ss
+        return ['00', String(parts[0]).padStart(2, '0'), String(parts[1]).padStart(2, '0')].join(':')
+      }
+      // Try to parse verbose forms like "1h 2m 3s"
+      const mm = s.match(/(?:(\d+)h)?\s*(?:(\d+)m)?\s*(?:(\d+)s)?/i)
+      if (mm) {
+        const h = Number(mm[1] || 0)
+        const m = Number(mm[2] || 0)
+        const sec = Number(mm[3] || 0)
+        return [h, m, sec].map(n => String(n).padStart(2, '0')).join(':')
+      }
+      return null
+    }
+
+    // Call internal scraper to get authoritative extracted values for the provided Strava activity
+    try {
+  // Use the actual request origin to build an absolute URL for internal fetch.
+  const origin = new URL(request.url).origin
+  const scrapeUrl = `${origin}/api/data/strava/scrape?url=${encodeURIComponent(stravaActivity)}`
+  console.log('Using origin for scrape:', origin)
+
+      const scrapeHeaders = {
+        'User-Agent': 'vrun-server/1.0',
+        Accept: 'application/json',
+      }
+      // forward optional Strava session cookies if included in the form (for authenticated pages)
+      const formCookieToken = formData.get('strava_remember_token')
+      const formCookieId = formData.get('strava_remember_id')
+      if (formCookieToken && formCookieId) {
+        scrapeHeaders['x-strava-remember-token'] = formCookieToken
+        scrapeHeaders['x-strava-remember-id'] = formCookieId
+      }
+
+      console.log('Fetching Strava scrape:', scrapeUrl)
+      const scrapeResp = await fetch(scrapeUrl, { headers: scrapeHeaders })
+      if (!scrapeResp.ok) {
+        const txt = await scrapeResp.text().catch(() => '')
+        console.error('Strava scrape failed:', scrapeResp.status, txt)
+        return NextResponse.json({ error: 'Failed to scrape Strava activity', status: scrapeResp.status, detail: txt }, { status: 502 })
+      }
+
+      const scrapeJson = await scrapeResp.json()
+      const extracted = scrapeJson.extracted || null
+      if (!extracted) {
+        console.error('Strava scrape returned no extracted object', scrapeJson)
+        return NextResponse.json({ error: 'Strava scrape did not return extracted data', detail: scrapeJson }, { status: 502 })
+      }
+
+      // Use extracted values to fill distance and duration if missing or override to authoritative values
+      const scrapedDistance = parseDistanceString(extracted.distance)
+      const scrapedDuration = normalizeDuration(extracted.moving_time)
+
+      if (!scrapedDistance || !scrapedDuration) {
+        console.error('Scrape did not produce distance or duration', { extracted })
+        // Try a second scrape attempt using request headers (in case cookies were sent as headers)
+        try {
+          const headerCookies = request.headers.get('cookie') || ''
+          const altHeaders = { 'User-Agent': 'vrun-server/1.0', Accept: 'application/json' }
+          if (headerCookies) altHeaders.Cookie = headerCookies
+          // also forward potential x-strava-remember-* headers
+          const hToken = request.headers.get('x-strava-remember-token')
+          const hId = request.headers.get('x-strava-remember-id')
+          if (hToken && hId) {
+            altHeaders['x-strava-remember-token'] = hToken
+            altHeaders['x-strava-remember-id'] = hId
+          }
+          // also forward cookies submitted as form fields (some clients post cookies in the form)
+          const formToken = formData.get('strava_remember_token')
+          const formId = formData.get('strava_remember_id')
+          if (formToken && formId) {
+            altHeaders['x-strava-remember-token'] = formToken
+            altHeaders['x-strava-remember-id'] = formId
+          }
+          console.log('Retrying scrape with forwarded headers')
+          const retryResp = await fetch(scrapeUrl, { headers: altHeaders })
+          if (retryResp.ok) {
+            const retryJson = await retryResp.json().catch(() => null)
+            const retryExtracted = retryJson?.extracted || null
+            const retryDist = parseDistanceString(retryExtracted?.distance)
+            const retryDur = normalizeDuration(retryExtracted?.moving_time)
+            if (retryDist && retryDur) {
+              console.log('Retry scrape succeeded with forwarded headers')
+              distance = retryDist
+              duration = retryDur
+              // attach scraped meta from retry
+              const scrapedMeta2 = {
+                activity_name: retryExtracted.activity_name || null,
+                location: retryExtracted.location || null,
+                date: retryExtracted.date || null,
+                description: retryExtracted.description || null,
+                pace: retryExtracted.pace || null,
+                authenticated: retryExtracted.authenticated || false,
+                auth_valid: retryExtracted.auth_valid || false,
+              }
+              formData.set('__scraped_meta', JSON.stringify(scrapedMeta2))
+            }
+          }
+        } catch (retryErr) {
+          console.warn('Retry scrape failed:', String(retryErr))
+        }
+      }
+      // after retry attempt, re-evaluate
+      if (!distance || !duration) {
+        return NextResponse.json({ error: 'Could not extract required distance or duration from Strava activity', scraped: extracted, issues: scrapeJson.issues || [] }, { status: 400 })
+      }
+
+      // override incoming form values to ensure authoritative data
+      // distance will be stored as numeric kilometers
+      distance = scrapedDistance
+      duration = scrapedDuration
+
+      // attach scraped metadata to notes so it's stored with the submission
+      const scrapedMeta = {
+        activity_name: extracted.activity_name || null,
+        location: extracted.location || null,
+        date: extracted.date || null,
+        description: extracted.description || null,
+  pace: extracted.pace || null,
+        authenticated: extracted.authenticated || false,
+        auth_valid: extracted.auth_valid || false,
+      }
+
+      // append to notes (existing variable 'submission' isn't created yet — we'll attach later)
+      // we'll serialize scrapedMeta into notes later when constructing submission
+      formData.set('__scraped_meta', JSON.stringify(scrapedMeta))
+    } catch (scrapeErr) {
+      console.error('Error while scraping Strava activity:', scrapeErr)
+      return NextResponse.json({ error: 'Internal error while scraping Strava', detail: String(scrapeErr) }, { status: 500 })
     }
 
     // Validate email format
@@ -395,6 +558,15 @@ export async function POST(request) {
       // Continue with submission if duplicate check fails
     }
 
+    // Pull scraped meta (if any) and include into submission
+    let scrapedMeta = null
+    try {
+      const raw = formData.get('__scraped_meta')
+      if (raw) scrapedMeta = JSON.parse(raw)
+    } catch (e) {
+      // ignore parse errors
+    }
+
     // Create submission data
     const submission = {
       id: Date.now().toString(),
@@ -408,7 +580,13 @@ export async function POST(request) {
       status: 'submitted',
       verificationStatus: 'pending',
       proofFileName: proofFile.name,
-      notes: 'Awaiting verification'
+      notes: 'Awaiting verification',
+      activity_name: scrapedMeta?.activity_name || null,
+      location: scrapedMeta?.location || null,
+      activity_date: scrapedMeta?.date || null,
+      pace: scrapedMeta?.pace || null,
+      authenticated: scrapedMeta?.authenticated || false,
+      auth_valid: scrapedMeta?.auth_valid || false,
     };
 
     console.log('New submission created:', submission);

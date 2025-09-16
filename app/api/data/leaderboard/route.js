@@ -40,11 +40,11 @@ function formatSecondsToHms(total) {
 export async function GET(request) {
   try {
     const sheets = await getGoogleSheetsClient();
-    const range = `${SUBMISSIONS_SHEET_NAME}!A2:I1000`;
+    const range = `${SUBMISSIONS_SHEET_NAME}!A2:N1000`;
     const res = await sheets.spreadsheets.values.get({ spreadsheetId: SPREADSHEET_ID, range });
     const rows = res.data.values || [];
 
-    // Columns: A=Date Submit, B=Nama Lengkap, C=Email, D=Handphone, E=Link Strava, F=Jarak, G=Durasi, H=Foto, I=Verified
+    // Columns: A=Date Submit, B=Nama Lengkap, C=Email, D=Handphone, E=Link Strava, F=Jarak, G=Durasi, H=Foto, I=Activity Name, J=Location, K=Activity Date, L=Pace, M=Authenticated, N=Auth Valid
     const users = {};
 
     for (const row of rows) {
@@ -52,9 +52,8 @@ export async function GET(request) {
       const email = (row[2] || '').trim().toLowerCase();
       const distance = parseFloat(row[5]) || 0;
       const duration = row[6] || '';
-      const verified = String(row[8] || '').toLowerCase().includes('verified');
 
-      if (!verified) continue; // only include verified submissions
+      // Remove verified check since there's no Verified column
       if (!name || !email) continue;
 
       const key = `${name}::${email}`;

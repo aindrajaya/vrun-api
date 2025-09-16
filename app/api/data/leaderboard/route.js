@@ -89,7 +89,6 @@ export async function GET(request) {
         <tr>
           <td>${i + 1}</td>
           <td>${u.name}</td>
-          <td>${u.email}</td>
           <td>${u.submissions} x</td>
           <td>${u.totalDistance}</td>
           <td>${u.totalDuration}</td>
@@ -134,7 +133,7 @@ export async function GET(request) {
               <div class="table-wrap">
                 <table>
                   <thead>
-                    <tr><th>#</th><th>Nama</th><th>Email</th><th>Subm</th><th>Jarak (km)</th><th>Durasi</th></tr>
+                    <tr><th>#</th><th>Nama</th><th>Subm</th><th>Jarak (km)</th><th>Durasi</th></tr>
                   </thead>
                   <tbody>
                     ${rowsHtml}

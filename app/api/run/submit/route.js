@@ -308,7 +308,7 @@ export async function POST(request) {
     const name = formData.get('name');
     const email = formData.get('email');
     const phone = formData.get('phone');
-    const stravaActivity = formData.get('stravaActivity');
+    const stravaActivity = formData.get('stravaActivity') + '/overview';
     let distance = formData.get('distance');
     let duration = formData.get('duration');
     const proofFile = formData.get('proof');
@@ -361,6 +361,7 @@ export async function POST(request) {
   // Use the actual request origin to build an absolute URL for internal fetch.
   const origin = new URL(request.url).origin
   const scrapeUrl = `${origin}/api/data/strava/scrape?url=${encodeURIComponent(stravaActivity)}`
+  console.log("GET URL", scrapeUrl)
   console.log('Using origin for scrape:', origin)
 
       const scrapeHeaders = {

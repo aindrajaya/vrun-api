@@ -4,10 +4,33 @@ import { load } from 'cheerio'
 export async function GET(request) {
   try {
     const { searchParams } = new URL(request.url)
-    const url = searchParams.get('url') || 'https://www.strava.com/activities/15790929996'
-    if (!/^https?:\/\/www\.strava\.com\/activities\/[0-9]+/.test(url)) {
-      return NextResponse.json({ error: 'invalid strava activity url' }, { status: 400 })
+    const originalUrl = searchParams.get('url') || 'https://www.strava.com/activities/15790929996'
+    if (!/^https?:\/\/(www\.strava\.com\/activities\/[0-9]+(?:\/overview)?|strava\.app\.link\/[A-Za-z0-9]+)$/.test(originalUrl)) {
+      return NextResponse.json({ error: 'invalid strava activity url or short link' }, { status: 400 })
     }
+
+    let finalUrl = originalUrl
+
+    // If it's a short link, follow the redirect to get the actual activity URL
+    if (originalUrl.includes('strava.app.link')) {
+      try {
+        const redirectResp = await fetch(originalUrl, { redirect: 'follow' })
+        finalUrl = redirectResp.url
+        // Small delay after redirect
+        await new Promise(resolve => setTimeout(resolve, 1000))
+      } catch (e) {
+        return NextResponse.json({ error: 'failed to resolve short link', details: e.message }, { status: 400 })
+      }
+    }
+
+    // Extract activity ID from the final URL
+    const activityIdMatch = finalUrl.match(/\/activities\/([0-9]+)/)
+    if (!activityIdMatch) {
+      return NextResponse.json({ error: 'could not extract activity ID from resolved URL' }, { status: 400 })
+    }
+    const activityId = activityIdMatch[1]
+    const url = `https://www.strava.com/activities/${activityId}/overview`
+    console.log("DATA FETCHED: ", url)
 
     // allow passing Strava cookies for authenticated fetch: headers or query params
     const cookieToken = request.headers.get('x-strava-remember-token') || searchParams.get('strava_remember_token')
@@ -16,8 +39,8 @@ export async function GET(request) {
 
     // fallback to environment-configured Strava session cookies (server-side consts)
     // Set STRAVA_REMEMBER_TOKEN and STRAVA_REMEMBER_ID in your environment to enable automatic authenticated fetches.
-    const envCookieToken = process.env.STRAVA_REMEMBER_TOKEN || "eyJzaWduaW5nX2tleSI6InYxIiwiZW5jcnlwdGlvbl9rZXkiOiJ2MSIsIml2IjoidHdnZFowb1M2YXVHS1VFQ21RaDRrZz09XG4iLCJhbGciOiJIUzI1NiJ9.eyJpc3MiOiJjb20uc3RyYXZhLmF0aGxldGVzIiwic3ViIjozNjkyMzY2MSwiaWF0IjoxNzU2NzE4Mzk2LCJleHAiOjE3NTkzMTAzOTYsImVtYWlsIjoiMU42OUpHWmpBTGo1K3FRRkV6TkVsZTZsWjV0WjNtZm9peEpBSXU2WkE0NGIycXY3UFZPUEE2ZFlKcG9NXG41R0NCK2FBTjhOSzNCeGIxQkoycklabkdlZz09XG4ifQ.GctTqu6w6wx_iUkZ75PFtBc3UvvSD3eOFnoURJTjbfQ"
-    const envCookieId = process.env.STRAVA_REMEMBER_ID || "36923661"
+    const envCookieToken = process.env.STRAVA_REMEMBER_TOKEN // Remove hardcoded value - use environment variable
+    const envCookieId = process.env.STRAVA_REMEMBER_ID // Remove hardcoded value - use environment variable
     const envCookieHeader = envCookieToken && envCookieId ? `strava_remember_token=${envCookieToken}; strava_remember_id=${envCookieId}` : null
 
     // choose the cookie header we will actually send (prefer request-provided, then env)
@@ -28,14 +51,36 @@ export async function GET(request) {
     }
 
     const fetchHeaders = {
-      'User-Agent': 'Mozilla/5.0 (compatible; vrun-bot/1.0)',
-      Accept: 'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8',
+      'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
+      'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.7',
       'Accept-Language': 'en-US,en;q=0.9',
+      'Accept-Encoding': 'gzip, deflate, br',
+      'DNT': '1',
+      'Connection': 'keep-alive',
+      'Upgrade-Insecure-Requests': '1',
+      'Sec-Fetch-Dest': 'document',
+      'Sec-Fetch-Mode': 'navigate',
+      'Sec-Fetch-Site': 'none',
+      'Sec-Fetch-User': '?1',
+      'Cache-Control': 'max-age=0',
       ...(useCookieHeader ? { Cookie: useCookieHeader, Referer: 'https://www.strava.com/' } : {}),
     }
 
     const resp = await fetch(url, { headers: fetchHeaders })
-    if (!resp.ok) return NextResponse.json({ error: 'fetch failed', status: resp.status }, { status: 502 })
+    if (!resp.ok) {
+      if (resp.status === 403) {
+        return NextResponse.json({
+          error: 'access forbidden - Strava may require authentication or cookies may be expired',
+          status: resp.status,
+          suggestion: 'Try providing valid strava_remember_token and strava_remember_id via headers or query params'
+        }, { status: 502 })
+      }
+      return NextResponse.json({ error: 'fetch failed', status: resp.status }, { status: 502 })
+    }
+
+  // Wait 4 seconds to allow JavaScript content to load on the overview page
+  await new Promise(resolve => setTimeout(resolve, 4000))
+
   const html = await resp.text()
   const $ = load(html)
 
@@ -49,17 +94,22 @@ export async function GET(request) {
 
     // parse stats list items individually for robustness
     const stats = {}
+    const foundLabels = [] // for debugging
     $('ul.inline-stats.section li').each((i, li) => {
       const label = $(li).find('.label').text().trim().toLowerCase()
       const strong = $(li).find('strong').first().text().trim()
+      foundLabels.push(`${label}: ${strong}`) // for debugging
+
       if (label.includes('distance')) stats.distance = strong
-      else if (label.includes('moving time') || label.includes('moving')) stats.moving_time = strong
-      else if (label.includes('pace')) stats.pace = strong
+      else if (label.includes('moving time') || label.includes('moving') || label.includes('time') || label.includes('duration')) stats.moving_time = strong
+      else if (label.includes('pace') || label.includes('avg pace') || label.includes('average pace')) stats.pace = strong
       else {
         // fallback: assign to generic keys like stat0, stat1
         stats[`stat${i}`] = strong
       }
     })
+
+    console.log('Found labels:', foundLabels) // Debug: show what labels were found
 
     // If distance/moving_time/pace not present, try to extract from concatenated activity text
     const activityText = $('ul.inline-stats.section').text().replace(/\s+/g, ' ').trim()
@@ -68,7 +118,7 @@ export async function GET(request) {
       if (distMatch) stats.distance = `${distMatch[1]} ${distMatch[2]}`
     }
     if (!stats.moving_time) {
-      const timeMatch = activityText.match(/(\d{1,2}:\d{2}:\d{2})/)
+      const timeMatch = activityText.match(/(\d{1,2}:\d{2}:\d{2}|\d{1,2}:\d{2})/)
       if (timeMatch) stats.moving_time = timeMatch[0]
     }
     if (!stats.pace) {
@@ -113,6 +163,52 @@ export async function GET(request) {
         const hay = (detailsEl.text() + ' ' + $('body').text()).replace(/\s+/g, ' ')
         const found = tryMatch(hay)
         if (found) stats.pace = found
+      }
+    }
+
+    // Robust fallback: detect moving_time in various formats across li text, details, or full html
+    if (!stats.moving_time) {
+      const timePatterns = [
+        /(\d{1,2}:\d{2}:\d{2})/,  // HH:MM:SS
+        /(\d{1,2}:\d{2})/,        // MM:SS
+        /(\d+)\s*h\s*(\d+)\s*m/,  // Xh Ym
+        /(\d+)\s*m\s*(\d+)\s*s/,  // Xm Ys
+      ]
+
+      const tryTimeMatch = (text) => {
+        for (const re of timePatterns) {
+          const m = text.match(re)
+          if (m) {
+            if (m[1] && m[2] && m[3]) {
+              // Xm Ys format
+              return `${m[1]}:${m[2]}:${m[3]}`
+            }
+            if (m[1] && m[2]) {
+              // Xh Ym format
+              return `${m[1]}:${m[2]}:00`
+            }
+            if (m[1]) {
+              return m[1]
+            }
+          }
+        }
+        return null
+      }
+
+      // check each li text
+      $('ul.inline-stats.section li').each((i, li) => {
+        if (!stats.moving_time) {
+          const text = $(li).text().replace(/\s+/g, ' ').trim()
+          const found = tryTimeMatch(text)
+          if (found) stats.moving_time = found
+        }
+      })
+
+      // check details and body as last resort
+      if (!stats.moving_time) {
+        const hay = (detailsEl.text() + ' ' + $('body').text()).replace(/\s+/g, ' ')
+        const found = tryTimeMatch(hay)
+        if (found) stats.moving_time = found
       }
     }
 

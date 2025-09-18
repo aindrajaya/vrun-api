@@ -5,32 +5,16 @@ export async function GET(request) {
   try {
     const { searchParams } = new URL(request.url)
     const originalUrl = searchParams.get('url') || 'https://www.strava.com/activities/15790929996'
-    if (!/^https?:\/\/(www\.strava\.com\/activities\/[0-9]+(?:\/overview)?|strava\.app\.link\/[A-Za-z0-9]+)$/.test(originalUrl)) {
-      return NextResponse.json({ error: 'invalid strava activity url or short link' }, { status: 400 })
+    if (!/^https:\/\/www\.strava\.com\/activities\/[0-9]+(?:\/overview)?$/.test(originalUrl)) {
+      return NextResponse.json({ error: 'invalid strava activity url - must be a direct activity URL with /overview' }, { status: 400 })
     }
 
     let finalUrl = originalUrl
 
-    // If it's a short link, follow the redirect to get the actual activity URL
-    if (originalUrl.includes('strava.app.link')) {
-      try {
-        const redirectResp = await fetch(originalUrl, { redirect: 'follow' })
-        finalUrl = redirectResp.url
-        // Small delay after redirect
-        await new Promise(resolve => setTimeout(resolve, 1000))
-      } catch (e) {
-        return NextResponse.json({ error: 'failed to resolve short link', details: e.message }, { status: 400 })
-      }
+    // Ensure URL has /overview suffix
+    if (!finalUrl.endsWith('/overview')) {
+      finalUrl = `${finalUrl}/overview`
     }
-
-    // Extract activity ID from the final URL
-    const activityIdMatch = finalUrl.match(/\/activities\/([0-9]+)/)
-    if (!activityIdMatch) {
-      return NextResponse.json({ error: 'could not extract activity ID from resolved URL' }, { status: 400 })
-    }
-    const activityId = activityIdMatch[1]
-    const url = `https://www.strava.com/activities/${activityId}/overview`
-    console.log("DATA FETCHED: ", url)
 
     // allow passing Strava cookies for authenticated fetch: headers or query params
     const cookieToken = request.headers.get('x-strava-remember-token') || searchParams.get('strava_remember_token')
@@ -66,7 +50,7 @@ export async function GET(request) {
       ...(useCookieHeader ? { Cookie: useCookieHeader, Referer: 'https://www.strava.com/' } : {}),
     }
 
-    const resp = await fetch(url, { headers: fetchHeaders })
+    const resp = await fetch(finalUrl, { headers: fetchHeaders })
     if (!resp.ok) {
       if (resp.status === 403) {
         return NextResponse.json({
@@ -257,7 +241,13 @@ export async function GET(request) {
       issues.push('provided Strava cookies appear invalid or expired; refresh strava_remember_token and strava_remember_id or use OAuth access token')
     }
 
-    return NextResponse.json({ raw: { detailsText, activityText }, extracted, diagnostics, ldjsonSample: ldjson ? ldjson : null, issues })
+    return NextResponse.json({
+      raw: { detailsText, activityText },
+      extracted,
+      diagnostics,
+      ldjsonSample: ldjson ? ldjson : null,
+      issues
+    })
   } catch (e) {
     return NextResponse.json({ error: e.message, stack: e.stack }, { status: 500 })
   }

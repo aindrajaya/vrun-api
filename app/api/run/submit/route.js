@@ -295,9 +295,49 @@ async function storeSubmissionInGoogleSheets(submissionData) {
 }
 
 /**
- * POST /api/run/submit
- * Handle run result submission for We Run Palestina
+ * Resolves Strava short links to full activity URLs
+ * @param {string} url - The URL to resolve (could be short link or direct URL)
+ * @returns {Promise<string>} - The resolved full activity URL
  */
+async function resolveStravaUrl(url) {
+  if (!url) return null;
+
+  // If it's already a direct activity URL, just ensure it has /overview
+  if (url.includes('strava.com/activities/')) {
+    return url.endsWith('/overview') ? url : `${url}/overview`;
+  }
+
+  // If it's a short link, resolve it
+  if (url.includes('strava.app.link')) {
+    try {
+      console.log('Resolving short link in submit endpoint:', url);
+      const response = await fetch(url, {
+        redirect: 'follow',
+        headers: {
+          'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36'
+        }
+      });
+      const resolvedUrl = response.url;
+      console.log('Resolved to:', resolvedUrl);
+
+      // Extract activity ID and create overview URL
+      const activityIdMatch = resolvedUrl.match(/\/activities\/([0-9]+)/);
+      if (activityIdMatch) {
+        return `https://www.strava.com/activities/${activityIdMatch[1]}/overview`;
+      }
+    } catch (e) {
+      console.error('Failed to resolve short link:', e.message);
+      throw new Error('Failed to resolve Strava short link');
+    }
+  }
+
+  // For any other URL format, return as-is but add /overview if it's a direct activity URL
+  if (url.includes('strava.com/activities/') && !url.endsWith('/overview')) {
+    return `${url}/overview`;
+  }
+
+  return url;
+}
 export async function POST(request) {
   try {
     console.log('=== POST /api/run/submit - Starting submission process ===');
@@ -308,10 +348,23 @@ export async function POST(request) {
     const name = formData.get('name');
     const email = formData.get('email');
     const phone = formData.get('phone');
-    const stravaActivity = formData.get('stravaActivity') + '/overview';
+    const rawStravaActivity = formData.get('stravaActivity');
     let distance = formData.get('distance');
     let duration = formData.get('duration');
     const proofFile = formData.get('proof');
+
+    // Resolve Strava URL (handle short links and ensure proper format)
+    let stravaActivity;
+    try {
+      stravaActivity = await resolveStravaUrl(rawStravaActivity);
+      console.log('Resolved Strava URL:', stravaActivity);
+    } catch (e) {
+      console.error('Error resolving Strava URL:', e);
+      return NextResponse.json(
+        { error: 'Invalid Strava activity URL or failed to resolve short link' },
+        { status: 400 }
+      );
+    }
 
     // Validate required fields (distance/duration will be filled from Strava scrape)
     if (!name || !email || !phone || !stravaActivity || !proofFile) {

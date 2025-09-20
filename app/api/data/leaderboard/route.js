@@ -52,27 +52,34 @@ export async function GET(request) {
       const email = (row[2] || '').trim().toLowerCase();
       const distance = parseFloat(row[5]) || 0;
       const duration = row[6] || '';
+      const pace = row[11] || ''; // Column L (0-indexed as 11)
 
       // Remove verified check since there's no Verified column
       if (!name || !email) continue;
 
       const key = `${name}::${email}`;
-      if (!users[key]) users[key] = { name, email, totalDistance: 0, totalSeconds: 0, submissions: 0 };
+      if (!users[key]) users[key] = { name, email, totalDistance: 0, totalSeconds: 0, submissions: 0, paces: [] };
 
       if (users[key].submissions < 4) {
         users[key].totalDistance += distance;
         users[key].totalSeconds += parseDurationToSeconds(duration);
         users[key].submissions += 1;
+        if (pace) users[key].paces.push(pace);
       }
     }
 
-    const leaderboard = Object.values(users).map(u => ({
-      name: u.name,
-      email: u.email,
-      submissions: u.submissions,
-      totalDistance: Number(u.totalDistance.toFixed(2)),
-      totalDuration: formatSecondsToHms(u.totalSeconds)
-    }));
+    const leaderboard = Object.values(users).map(u => {
+      // Calculate average pace if available
+      const avgPace = u.paces.length > 0 ? u.paces[Math.floor(u.paces.length / 2)] : ''; // Use median pace
+      return {
+        name: u.name,
+        email: u.email,
+        submissions: u.submissions,
+        totalDistance: Number(u.totalDistance.toFixed(2)),
+        totalDuration: formatSecondsToHms(u.totalSeconds),
+        avgPace: avgPace
+      };
+    });
 
     // sort by totalDistance desc then totalSeconds asc
     leaderboard.sort((a, b) => {
@@ -92,6 +99,7 @@ export async function GET(request) {
           <td>${u.submissions} x</td>
           <td>${u.totalDistance}</td>
           <td>${u.totalDuration}</td>
+          <td>${u.avgPace || '-'}</td>
         </tr>
       `).join('');
 
@@ -120,7 +128,7 @@ export async function GET(request) {
               .duration{color:#0b1220}
               @media (max-width:720px){
                 .container{margin:8px}
-                thead th:nth-child(3), td:nth-child(3){display:none}
+                thead th:nth-child(3), td:nth-child(3), thead th:nth-child(6), td:nth-child(6){display:none}
               }
             </style>
           </head>
@@ -133,7 +141,7 @@ export async function GET(request) {
               <div class="table-wrap">
                 <table>
                   <thead>
-                    <tr><th>#</th><th>Nama</th><th>Subm</th><th>Jarak (km)</th><th>Durasi</th></tr>
+                    <tr><th>#</th><th>Nama</th><th>Subm</th><th>Jarak (km)</th><th>Durasi</th><th>Pace</th></tr>
                   </thead>
                   <tbody>
                     ${rowsHtml}

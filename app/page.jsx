@@ -83,20 +83,26 @@ export default function RegisterPage() {
     if (type === 'basic') {
       return {
         value: 'basic',
-        label: '💫 Basic - Rp. 100.000',
-        description: 'Paket dasar tanpa jersey'
+        label: '💫 Basic - Rp. 90.000',
+        description: 'Paket dasar tanpa jersey (Diskon 10% dari Rp 100.000)',
+        originalPrice: 100000,
+        discountedPrice: 90000
       };
     } else if (type === 'basic-jersey') {
       return {
         value: 'basic-jersey',
-        label: '🌟 Basic + Jersey - Rp. 250.000',
-        description: 'Paket dasar dengan jersey'
+        label: '🌟 Basic + Jersey - Rp. 225.000',
+        description: 'Paket dasar dengan jersey (Diskon 10% dari Rp 250.000)',
+        originalPrice: 250000,
+        discountedPrice: 225000
       };
     } else {
       return {
         value: 'jersey-only',
-        label: '👕 Jersey Only - Rp. 150.000',
-        description: 'Hanya jersey'
+        label: '👕 Jersey Only - Rp. 135.000',
+        description: 'Hanya jersey (Diskon 10% dari Rp 150.000)',
+        originalPrice: 150000,
+        discountedPrice: 135000
       };
     }
   };
@@ -165,24 +171,30 @@ export default function RegisterPage() {
   const getPackageDetails = () => {
     if (formData.packageType === 'basic') {
       return {
-        baseAmount: 100000,
+        baseAmount: 90000,
         fixedDonation: 0,
-        total: 100000,
-        name: 'Basic'
+        total: 90000,
+        name: 'Basic',
+        originalPrice: 100000,
+        discountedPrice: 90000
       };
     } else if (formData.packageType === 'basic-jersey') {
       return {
-        baseAmount: 250000,
+        baseAmount: 225000,
         fixedDonation: 0,
-        total: 250000,
-        name: 'Basic + Jersey'
+        total: 225000,
+        name: 'Basic + Jersey',
+        originalPrice: 250000,
+        discountedPrice: 225000
       };
     } else {
       return {
-        baseAmount: 150000,
+        baseAmount: 135000,
         fixedDonation: 0,
-        total: 150000,
-        name: 'Jersey Only'
+        total: 135000,
+        name: 'Jersey Only',
+        originalPrice: 150000,
+        discountedPrice: 135000
       };
     }
   };
@@ -294,10 +306,10 @@ export default function RegisterPage() {
                       Paket: <span className="font-semibold">{paymentData?.packageType || 'Starter'}</span>
                     </div>
                     <div className="mb-2">
-                      Biaya Tetap: <span className="font-semibold">Rp {(paymentData?.baseAmount || 80000).toLocaleString('id-ID')}</span>
+                      Biaya Tetap: <span className="font-semibold">Rp {(paymentData?.baseAmount || packageDetails.baseAmount).toLocaleString('id-ID')}</span>
                     </div>
                     <div className="mb-2">
-                      Donasi Tetap: <span className="font-semibold">Rp {(paymentData?.fixedDonation || 20000).toLocaleString('id-ID')}</span>
+                      Donasi Tetap: <span className="font-semibold">Rp {(paymentData?.fixedDonation || packageDetails.fixedDonation).toLocaleString('id-ID')}</span>
                     </div>
                     {paymentData?.additionalDonation > 0 && (
                       <div className="mb-2">
@@ -305,7 +317,7 @@ export default function RegisterPage() {
                       </div>
                     )}
                     <div className="mb-3">
-                      <span className="font-bold">Total: Rp {(paymentData?.totalAmount || 100000).toLocaleString('id-ID')}</span>
+                      <span className="font-bold">Total: Rp {(paymentData?.totalAmount || totalAmount).toLocaleString('id-ID')}</span>
                     </div>
                     <div className="mb-3">
                       {paymentData?.data?.paymentInstructions}
@@ -333,7 +345,7 @@ export default function RegisterPage() {
                           }}
                           className="w-full bg-green-600 text-white py-2 px-4 rounded-lg text-sm font-medium hover:bg-green-700 transition-colors"
                         >
-                          Bayar Sekarang - Rp {(paymentData?.totalAmount || 100000).toLocaleString('id-ID')}
+                          Bayar Sekarang - Rp {(paymentData?.totalAmount || totalAmount).toLocaleString('id-ID')}
                         </button>
                         {redirectCountdown !== null && (
                           <div className="text-center text-xs text-green-600 mt-2">
@@ -364,7 +376,7 @@ export default function RegisterPage() {
                         className="w-full px-4 sm:px-6 lg:px-8 py-1 sm:py-2 lg:py-4 text-base sm:text-lg lg:text-xl border-2 border-gray-200 rounded-full focus:ring-2 focus:ring-green-500 focus:border-green-500 outline-none transition-all duration-200 text-gray-900 bg-white cursor-pointer text-left flex items-center justify-between"
                       >
                         <span className="flex-1">
-                          {getPackageOption(formData.packageType).label}
+                          {getPackageOption(formData.packageType).label} <span className="text-sm text-gray-500 line-through ml-2">Rp {getPackageOption(formData.packageType).originalPrice.toLocaleString('id-ID')}</span>
                         </span>
                         <svg 
                           className={`w-5 h-5 text-gray-400 transition-transform duration-200 ${isDropdownOpen ? 'rotate-180' : ''}`} 
@@ -391,10 +403,10 @@ export default function RegisterPage() {
                               <span className="text-2xl">💫</span>
                               <div className="flex-1">
                                 <div className="font-semibold text-gray-900 text-base sm:text-lg">
-                                  Basic - Rp. 100.000
+                                  Basic - Rp. 90.000 <span className="text-sm text-gray-500 line-through ml-2">Rp 100.000</span>
                                 </div>
-                                <div className="text-sm text-gray-600">
-                                  Paket dasar tanpa jersey
+                                <div className="text-sm text-green-600 font-medium">
+                                  Diskon 10% - Hemat Rp 10.000
                                 </div>
                               </div>
                               {formData.packageType === 'basic' && (
@@ -417,10 +429,10 @@ export default function RegisterPage() {
                               <span className="text-2xl">🌟</span>
                               <div className="flex-1">
                                 <div className="font-semibold text-gray-900 text-base sm:text-lg">
-                                  Basic + Jersey - Rp. 250.000
+                                  Basic + Jersey - Rp. 225.000 <span className="text-sm text-gray-500 line-through ml-2">Rp 250.000</span>
                                 </div>
-                                <div className="text-sm text-gray-600">
-                                  Paket dasar dengan jersey
+                                <div className="text-sm text-green-600 font-medium">
+                                  Diskon 10% - Hemat Rp 25.000
                                 </div>
                               </div>
                               {formData.packageType === 'basic-jersey' && (
@@ -443,10 +455,10 @@ export default function RegisterPage() {
                               <span className="text-2xl">👕</span>
                               <div className="flex-1">
                                 <div className="font-semibold text-gray-900 text-base sm:text-lg">
-                                  Jersey Only - Rp. 150.000
+                                  Jersey Only - Rp. 135.000 <span className="text-sm text-gray-500 line-through ml-2">Rp 150.000</span>
                                 </div>
-                                <div className="text-sm text-gray-600">
-                                  Hanya jersey
+                                <div className="text-sm text-green-600 font-medium">
+                                  Diskon 10% - Hemat Rp 15.000
                                 </div>
                               </div>
                               {formData.packageType === 'jersey-only' && (

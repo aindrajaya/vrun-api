@@ -76,17 +76,17 @@ async function createMidtransPaymentLink(registrationData, totalAmount = 180000)
     let jerseyPrice = 0;
     
     if (packageType === 'basic') {
-      baseAmount = 70000;
+      baseAmount = 80000;
       fixedDonation = 20000;
       jerseyPrice = 0;
     } else if (packageType === 'basic-jersey') {
-      baseAmount = 55000;
+      baseAmount = 80000;
       fixedDonation = 20000;
       jerseyPrice = 150000;
     } else if (packageType === 'jersey-only') {
       baseAmount = 0;
       fixedDonation = 0;
-      jerseyPrice = 135000;
+      jerseyPrice = 150000;
     }
     
     const additionalDonation = registrationData.additionalDonation || 0;
@@ -412,17 +412,17 @@ async function storeRegistrationInGoogleSheets(registrationData) {
                 
                 //Discount 10% Original Rp. 80000
                 if (packageType === 'basic') {
-                  baseAmount = 70000;
+                  baseAmount = 80000;
                   fixedDonation = 20000;
                   jerseyPrice = 0;
                 } else if (packageType === 'basic-jersey') {
-                  baseAmount = 55000;
+                  baseAmount = 80000;
                   fixedDonation = 20000;
                   jerseyPrice = 150000;
                 } else if (packageType === 'jersey-only') {
                   baseAmount = 0;
                   fixedDonation = 0;
-                  jerseyPrice = 135000;
+                  jerseyPrice = 150000;
                 }
                 
                 const additionalDonation = registrationData.additionalDonation || 0;
@@ -430,11 +430,8 @@ async function storeRegistrationInGoogleSheets(registrationData) {
             }
             if(key === 'baseAmount') {
                 const packageType = registrationData.packageType || 'basic';
-                if (packageType === 'basic') {
-                  return 70000; //Discount 10% original Rp 80000
-                } 
-                if (packageType === 'basic-jersey'){
-                  return 55000; //Discount 10%
+                if (packageType === 'basic' || packageType === 'basic-jersey') {
+                  return 80000;
                 } 
                 else {
                   return 0;
@@ -450,12 +447,9 @@ async function storeRegistrationInGoogleSheets(registrationData) {
             }
             if(key === 'jerseyPrice') {
                 const packageType = registrationData.packageType || 'basic';
-                if (packageType === 'basic-jersey') {
+                if (packageType === 'basic-jersey' || packageType === 'jersey-only') {
                   return 150000;
                 } 
-                if( packageType === 'jersey-only'){
-                  return 135000; //Discount 10%
-                }
                 else {
                   return 0;
                 }
@@ -661,17 +655,17 @@ export async function POST(request) {
     let jerseyPrice = 0;
     
     if (packageTypeValue === 'basic') {
-      baseAmount = 70000;
+      baseAmount = 80000;
       fixedDonation = 20000;
       jerseyPrice = 0;
     } else if (packageTypeValue === 'basic-jersey') {
-      baseAmount = 55000;
+      baseAmount = 80000;
       fixedDonation = 20000;
       jerseyPrice = 150000;
     } else if (packageTypeValue === 'jersey-only') {
       baseAmount = 0;
       fixedDonation = 0;
-      jerseyPrice = 135000;
+      jerseyPrice = 150000;
     }
     
     const additionalDonation = parseFloat(donationAmount) || 0;

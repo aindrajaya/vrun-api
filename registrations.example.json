@@ -1,0 +1,14 @@
+[
+  {
+    "id": "example-id",
+    "name": "Example Name",
+    "email": "example@mail.com",
+    "phone": "08xxxxxxxxxx",
+    "stravaName": "Strava Name",
+    "registrationDate": "2025-01-01T00:00:00.000Z",
+    "status": "pending",
+    "paymentStatus": "unpaid",
+    "donationAmount": 0,
+    "donationDate": null
+  }
+]
